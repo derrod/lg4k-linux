@@ -87,10 +87,10 @@ int sys_sscanf(const char *buf, const char *fmt, ...)
 
 unsigned long long sys_gettimestamp()
 {
-    struct timespec ts;
+    struct timespec64 ts;
     unsigned long long timestamp;
     
-    ktime_get_ts(&ts);
+    ktime_get_ts64(&ts);
     timestamp=ts.tv_sec ;
     timestamp*=1000000000;
     timestamp+=ts.tv_nsec;
@@ -376,17 +376,17 @@ SIZE_T sys_fread(void *fp, void *buf, SIZE_T size, SIZE_T count, SIZE_T offset)
     loff_t pos = offset;
     SIZE_T res;
 
-    fs =get_fs();
-    set_fs(KERNEL_DS);
+    // fs =get_fs();
+    // set_fs(KERNEL_DS);
 
 //    vfs_read(fp, buf, count, &pos);
-    res = vfs_read(fp, buf, count, &pos);
+    res = kernel_read(fp, buf, count, &pos);
     if (res > 0) {
 //        ((struct file*)fp)->f_pos = pos;
 //        printk("read size:%d", (int)res);
     }
 
-    set_fs(fs);
+    // set_fs(fs);
 
     return res;
 }
