@@ -1,0 +1,5 @@
+board_config.c
+board_i2c.c
+board_gpio.c
+board_v4l2.c
+board_alsa.c
