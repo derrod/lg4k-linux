@@ -125,7 +125,7 @@ void board_alsa_init(cxt_mgr_handle_t cxt_mgr)
 			err=BOARD_ALSA_ERROR_ALLOC_CXT;
 			break;
 		}
-		if (subsystem_id == 0x5113) 
+		if (subsystem_id == 0x5730)
 		    alsa_info.name="AVerMedia CL511H";
 		alsa_info.pcm_count=sizeof(cl511h_pcm_info)/sizeof(alsa_model_pcm_info_t);
 		alsa_info.support_fmt_mask=BIT_ALSA_MODEL_FMT_S16_LE | BIT_ALSA_MODEL_FMT_S24_LE;

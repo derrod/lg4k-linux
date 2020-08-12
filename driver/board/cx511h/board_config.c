@@ -53,7 +53,7 @@ pci_model_id_t id_table[]={
       .vendor=0x1461,
       .device=0x0054, //according to hw DEVICE ID config
       .sub_vendor = 0x1461,
-	  .sub_device = 0x5113,
+      .sub_device = 0x5730,
       .driver_data=CL511H,        
     },
     {
