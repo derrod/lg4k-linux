@@ -15,6 +15,7 @@
 #include <linux/slab.h>
 #include <linux/init.h>
 #include <linux/version.h>
+#include <linux/pci.h>
 #include "aver_version.h"
 
 //#define DRIVER_VER "1.0.0026"
@@ -42,4 +43,11 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Driver for cx511h capture card" " v" DRIVER_VER);
 MODULE_AUTHOR("AVerMedia Tech. Inc.");
 
+
+static struct pci_device_id aver_ids[  ] = {
+    { PCI_DEVICE(0x1461, 0x0054) },
+    { 0, },
+};
+
+MODULE_DEVICE_TABLE(pci, aver_ids);
 
