@@ -11,7 +11,6 @@ This was tested on Ubuntu 20.04 LTS and Fedora 32. Linux distributions other tha
 * Driver needs to be recompiled/installed manually every time there's a kernel update
 * RGB LEDs are not supported and will keep flashing red
 * Scaler doesn't seem to work so selected resolution has to match input resolution
-* Driver isn't automatically loaded
 
 ## How to
 
@@ -19,10 +18,11 @@ This was tested on Ubuntu 20.04 LTS and Fedora 32. Linux distributions other tha
 * run `./build.sh`
   + Note: switch to `fedora` branch if it doesn't compile and try again
 * run `sudo ./install.sh`
-* run `sudo modprobe cx511h`
+* run `sudo modprobe cx511h` or reboot
 
 ## ToDo
 
-* Make driver load automatically
+* ~~Make driver load automatically~~
 * Maybe see if we can send a signal to turn off the LEDs by looking at the Windows driver
 * Check some audio issues in OBS and see why RGB24 doesn't work in there either
+
