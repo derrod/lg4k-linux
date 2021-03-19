@@ -24,20 +24,20 @@ extern "C" {
 
 typedef enum
 {
-    CL511H=0,
+    GC573=0,
     SUPPORT_BOARD_NUM,        
 }board_type_e;
 
-enum cl511h_input_e
+enum gc573_input_e
 {
-    CL511H_HDMI_INPUT=0,
-    CL511H_INPUT_COUNT,
+    GC573_HDMI_INPUT=0,
+    GC573_INPUT_COUNT,
 };
 
-enum cl511h_i2c_chip_e
+enum gc573_i2c_chip_e
 {
-    CL511H_I2C_CHIP_ITE6805_0,
-    CL511H_I2C_CHIP_COUNT,
+    GC573_I2C_CHIP_ITE6805_0,
+    GC573_I2C_CHIP_COUNT,
 };
 
 typedef struct

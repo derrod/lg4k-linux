@@ -36,7 +36,7 @@ typedef struct
         i2c_model_handle_t i2c_model_handle;
         task_model_handle_t task_model_handle;
         handle_t aver_xilinx_handle;
-        handle_t i2c_chip_handle[CL511H_I2C_CHIP_COUNT];
+        handle_t i2c_chip_handle[GC573_I2C_CHIP_COUNT];
         ite6805_frameinfo_t cur_fe_frameinfo;
         enum ite6805_audio_sample cur_fe_audioinfo;
         int cur_bchs_value;
@@ -45,9 +45,9 @@ typedef struct
         int board_id;
 }board_v4l2_context_t;
 
-static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
+static board_chip_desc_t gc573_chip_desc[GC573_I2C_CHIP_COUNT]=
 {
-        [CL511H_I2C_CHIP_ITE6805_0]=
+        [GC573_I2C_CHIP_ITE6805_0]=
         {
             .name=ITE6805_DRVNAME,
             .index=1,
@@ -55,9 +55,9 @@ static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
     
 };
 
-static framegrabber_setup_input_info_t cl511h_input_info[] =
+static framegrabber_setup_input_info_t gc573_input_info[] =
 {
-    [CL511H_HDMI_INPUT] =
+    [GC573_HDMI_INPUT] =
     {
         .name = "HDMI",
         .support_framesize_info =
@@ -86,15 +86,15 @@ static framegrabber_setup_input_info_t cl511h_input_info[] =
                                     | REFRESHRATE_25_BIT | REFRESHRATE_24_BIT,                       
         },
     },
-    [CL511H_INPUT_COUNT] =
+    [GC573_INPUT_COUNT] =
     {
 		.name = NULL,
 	},
 };
 
-static framegrabber_property_t  cl511h_property={
-		.name="CL511H",
-		.input_setup_info=cl511h_input_info,
+static framegrabber_property_t  gc573_property={
+		.name="GC573",
+		.input_setup_info=gc573_input_info,
 		.support_out_pixfmt_mask=FRAMEGRABBER_PIXFMT_BITMSK,//FRAMEGRABBER_PIXFMT_YUYV_BIT ,  //tt 0615
 		//.max_supported_line_width=3840,
 		//.max_supported_line_width=4096,
@@ -105,8 +105,8 @@ static framegrabber_property_t  cl511h_property={
 static v4l2_model_device_setup_t device_info=
 {
     .type = DEVICE_TYPE_GRABBER,
-    .driver_name="CL511H",
-    .card_name="AVerMedia CL511H",
+    .driver_name="GC573",
+    .card_name="AVerMedia GC573",
     .capabilities= V4L2_MODEL_CAPS_CAPTURE_BIT | V4L2_MODEL_CAPS_READWRITE_BIT | V4L2_MODEL_CAPS_STREAMING_BIT,
     .buffer_type=V4L2_MODEL_BUF_TYPE_DMA_SG,
 };
@@ -204,7 +204,7 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     framegrabber_framemode_e framemode;
     const framegrabber_pixfmt_t *pixfmt=framegrabber_g_out_pixelfmt(handle);
     
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
     //ite6805_get_hdcp_state(ite6805_handle, &hdcp_state);
     //ite6805_set_hdcp_state(ite6805_handle, hdcp_state);
@@ -365,7 +365,7 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
 static void cx511h_stream_off(framegrabber_handle_t handle)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 	
 	//debug_msg(">>>>>>>>>>>%s...\n",__func__);
 	//ite6805_set_freerun_screen(ite6805_handle,TRUE);
@@ -398,7 +398,7 @@ static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int
 static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);//
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_brightness(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_bright(board_v4l2_cxt->aver_xilinx_handle);
@@ -411,7 +411,7 @@ static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness)
 static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_contrast(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_contrast(board_v4l2_cxt->aver_xilinx_handle);
@@ -425,7 +425,7 @@ static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast)
 static void cx511h_hue_read(framegrabber_handle_t handle,int *hue)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_hue(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_hue(board_v4l2_cxt->aver_xilinx_handle);	
@@ -439,7 +439,7 @@ static void cx511h_hue_read(framegrabber_handle_t handle,int *hue)
 static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_saturation(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_saturation(board_v4l2_cxt->aver_xilinx_handle);
@@ -453,7 +453,7 @@ static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation)
 static void cx511h_bchs_write(framegrabber_handle_t handle)
 {
 //	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	int bchs_value = handle->fg_bchs_value;
 	int bchs_select = handle->fg_bchs_selection;	
@@ -525,7 +525,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     {
         //stop task
         board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
         ite6805_power_off(ite6805_handle);
 
@@ -535,7 +535,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     {
         //start task
         board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
         ite6805_power_on(ite6805_handle);
 
@@ -616,7 +616,7 @@ static void cx511h_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
 static void cx511h_v4l2_hardware_init(framegrabber_handle_t handle)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
     iTE6805_Hardware_Init(ite6805_handle);
 }
@@ -625,7 +625,7 @@ static void check_signal_stable_task(void *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=data;
     //ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; //check 20170511  
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0]; //check 20170511
     int width,height;
     int dual_pixel;
     int dual_pixel_set;
@@ -701,7 +701,7 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
     board_v4l2_context_t *board_v4l2_cxt=cxt;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     enum ite6805_audio_sample *fe_audioinfo=&board_v4l2_cxt->cur_fe_audioinfo; 
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     ite6805_out_format_e out_format;
     unsigned int hdcp_flag;
     
@@ -833,7 +833,7 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
             break;
         }
 
-        framegrabber_handle = framegrabber_init(cxt_mgr, &cl511h_property, &cx511h_ops);
+        framegrabber_handle = framegrabber_init(cxt_mgr, &gc573_property, &cx511h_ops);
         if (framegrabber_handle == NULL)
         {
             err = BOARD_V4L2_ERROR_FRAMEGRABBER_INIT;
@@ -870,9 +870,9 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
             break;
 	    }
 	    board_v4l2_cxt->i2c_model_handle = i2c_mgr;
-        for(i=0;i<CL511H_I2C_CHIP_COUNT;i++)
+        for(i=0;i<GC573_I2C_CHIP_COUNT;i++)
 	    {
-            board_v4l2_cxt->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,cl511h_chip_desc[i].name,cl511h_chip_desc[i].index);
+            board_v4l2_cxt->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,gc573_chip_desc[i].name,gc573_chip_desc[i].index);
             debug_msg("board_v4l2 i2c_chip_handle[%d] %p\n",i,board_v4l2_cxt->i2c_chip_handle[i]);
 	    }
         task_model_handle=cxt_manager_get_context(cxt_mgr,TASK_MODEL_CXT_ID,0);
@@ -899,12 +899,12 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
         v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_PREPARE,&cx511h_v4l2_buffer_prepare, board_v4l2_cxt);
         v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_INIT,&cx511h_v4l2_buffer_init, board_v4l2_cxt);
       
-        ite6805_register_callback(board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0],cx511h_ite6805_event,board_v4l2_cxt);
+        ite6805_register_callback(board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0],cx511h_ite6805_event,board_v4l2_cxt);
         framegrabber_start(framegrabber_handle);
         cxt_manager_ref_context(aver_xilinx_handle);
         
         board_v4l2_cxt->board_id = board_id;
-        //ite6805_get_board_id(board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0],&board_v4l2_cxt->board_id); 
+        //ite6805_get_board_id(board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0],&board_v4l2_cxt->board_id);
         
     }
     while (0);
@@ -939,7 +939,7 @@ void board_v4l2_suspend(cxt_mgr_handle_t cxt_mgr)
         return;
     }
 
-    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     if (!ite6805_handle)
     {
         debug_msg("Error: cannot get ite6805_handle");
@@ -961,7 +961,7 @@ void board_v4l2_resume(cxt_mgr_handle_t cxt_mgr)
         return;
     }
 
-    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     if (!ite6805_handle)
     {
         debug_msg("Error: cannot get ite6805_handle");

@@ -55,7 +55,7 @@ static i2c_dev_info_t cx511h_i2c_bus1_devices[]=
 
 static i2c_dev_info_t *board_i2c_bus_devices[SUPPORT_BOARD_NUM][BOARD_I2C_BUS_NUM]=
 {
-  [CL511H][I2C_BUS_COM]= &cx511h_i2c_bus1_devices[0], //reserved one I2C
+  [GC573][I2C_BUS_COM]= &cx511h_i2c_bus1_devices[0], //reserved one I2C
   
 };
 

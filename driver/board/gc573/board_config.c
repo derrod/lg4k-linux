@@ -44,7 +44,7 @@ MODULE_PARM_DESC(copy_protetion_pic, "Loading this bitmap file and display it wh
 int board_init(void);
 void board_exit(void);
 
-const char *BOARD_NAME="CL511H";
+const char *BOARD_NAME="GC573";
 //pci_model_driver_setup_t pci_setup;
 extern int subsystem_id;
 
@@ -54,7 +54,7 @@ pci_model_id_t id_table[]={
       .device=0x0054, //according to hw DEVICE ID config
       .sub_vendor = 0x1461,
       .sub_device = 0x5730,
-      .driver_data=CL511H,        
+      .driver_data=GC573,
     },
     {
       0

@@ -14,7 +14,7 @@ else
 KERNEL_VER:=$(shell uname -r)
 endif
 
-BOARD ?= cx511h
+BOARD ?= gc573
 
 ifeq ($(MAKELEVEL),0)
 export BASE_DIR:=$(realpath $(dir $(MAKEFILE_LIST)))/
