@@ -87,10 +87,10 @@ int sys_sscanf(const char *buf, const char *fmt, ...)
 
 unsigned long long sys_gettimestamp()
 {
-    struct timespec ts;
+    struct timespec64 ts;
     unsigned long long timestamp;
     
-    ktime_get_ts(&ts);
+    ktime_get_ts64(&ts);
     timestamp=ts.tv_sec ;
     timestamp*=1000000000;
     timestamp+=ts.tv_nsec;
