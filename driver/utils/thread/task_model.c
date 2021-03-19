@@ -28,7 +28,7 @@ typedef struct
  {
     queue_t queue;
     const char *name;
-    task_work_func_t work_func;
+    task_worker_func_t work_func;
     void *work_cxt;
  }task_model_task_t;
     
@@ -414,7 +414,7 @@ static task_model_task_t *task_model_new_task(task_model_cxt_t *task_model_cxt)
 
 
 
-task_handle_t task_model_create_task(task_model_handle_t task_model_handle,task_work_func_t work_func,void *work_cxt,const char *name)
+task_handle_t task_model_create_task(task_model_handle_t task_model_handle,task_worker_func_t work_func,void *work_cxt,const char *name)
 {
     task_model_task_t *task=NULL;
     
