@@ -238,8 +238,6 @@ static void trace_model_release(void *cxt)
 {
     trace_context_t *trace_cxt = cxt;
 
-    pr_info("%s\n", __func__);
-
     if (trace_cxt)
     {
         uninit_debug();

@@ -226,7 +226,7 @@ int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capabilit
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	
-    //pr_info("%s...\n",__func__);
+
 
 	if(v4l2m_context)
 	{
@@ -256,7 +256,7 @@ int v4l2_model_ioctl_enum_fmt_vid_cap(struct file *file, void *fh, struct v4l2_f
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	U32_T index = f->index;
 
-    //pr_info("%s...\n",__func__);
+
 	if(f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 	{
 		pr_info("%s.\n",__func__);
@@ -309,7 +309,7 @@ int v4l2_model_ioctl_g_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 	{
 		int width,height;
 		//unsigned bytesperline;
-        //pr_info("%s...\n",__func__);
+
 		framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle,&width,&height);
 		//bytesperline=framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle);
         //pr_info("%s..f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
@@ -432,7 +432,7 @@ int v4l2_model_ioctl_s_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 
 	/* TODO check setting format is supported */
 
-   //pr_info("%s...\n",__func__);
+
 
    if(framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle,f->fmt.pix.pixelformat)==NULL)
    {
@@ -457,7 +457,7 @@ int v4l2_model_ioctl_enum_framesizes(struct file *file, void *fh, struct v4l2_fr
 	const framegrabber_pixfmt_t *pixfmt;
 	int width=0,height=0;
 
-    //pr_info("%s...\n",__func__);
+
 	pixfmt=framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle,fsize->pixel_format);
 	//pr_info("%s %08x %p\n",__func__,fsize->pixel_format,pixfmt);
 	if(pixfmt==NULL)
@@ -488,7 +488,7 @@ int v4l2_model_ioctl_enum_framesizes(struct file *file, void *fh, struct v4l2_fr
 int v4l2_model_ioctl_enum_input(struct file *file, void *fh, struct v4l2_input *inp)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-    pr_info("%s...\n",__func__);
+
 	if (inp->index >= framegrabber_g_input_num(v4l2m_context->framegrabber_handle))
 		return -EINVAL;
 	inp->type = V4L2_INPUT_TYPE_CAMERA;
@@ -535,7 +535,7 @@ int v4l2_model_ioctl_g_input(struct file *file, void *fh, unsigned int *i)
 int v4l2_model_ioctl_s_input(struct file *file, void *fh, unsigned int i)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	//pr_info("%s...\n",__func__);
+
 	if(i < 0 || i > framegrabber_g_input_num(v4l2m_context->framegrabber_handle))
 	{
 		pr_info("..%s..\n",__func__);
@@ -555,7 +555,7 @@ int v4l2_model_ioctl_enum_frameintervals(struct file *file, void *fh, struct v4l
 
 	
 	interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle); 
-    //pr_info("%s...\n",__func__);
+
 
 	frameinterval=framegrabber_g_framesize_supportrefreshrate(v4l2m_context->framegrabber_handle,fival->width,fival->height,fival->index);
 	if(frameinterval)
@@ -595,7 +595,7 @@ int v4l2_model_ioctl_g_parm(struct file *file, void *fh,struct v4l2_streamparm *
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	//int current_denominator;
-	//pr_info("%s...\n",__func__);
+
 	if (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 	{
 		pr_info("%s..\n",__func__);
@@ -752,7 +752,7 @@ int v4l2_model_ioctl_s_ctrl(struct file *file, void *fh,struct v4l2_control *a)
 //	int io_bchs_value=0;
 //	int io_bchs_select=0;
 
-    //pr_info("%s...\n",__func__);
+
 	
 	if( found_ctrl ) {
 		switch( found_ctrl->type ) {
@@ -926,42 +926,42 @@ int v4l2_model_ioctl_g_dv_timings(struct file *file, void *fd,
 int v4l2_model_ioctl_enum_std(struct file *file, void *fd,
                                 struct v4l2_standard *std)
 {
-	pr_info("%s...\n",__func__);
+
     return -EINVAL;
 }
 
 int v4l2_model_ioctl_s_std(struct file *file, void *fd,
             v4l2_std_id std)
 {
-	pr_info("%s...\n",__func__);
+
     return 0;
 }
 
 int v4l2_model_ioctl_g_std(struct file *file, void *fd,
             v4l2_std_id *std)
 {
-	pr_info("%s...\n",__func__);
+
     return 0;
 }
 
 int v4l2_model_ioctl_querystd(struct file *file, void *fd,
             v4l2_std_id *std)
 {
-	pr_info("%s...\n",__func__);
+
     return 0;
 }
 
 int v4l2_model_g_tuner(struct file *file, void *fd,
             struct v4l2_tuner *tuner)
 {
-	pr_info("%s...\n",__func__);
+
     return 0;
 }
 
 int v4l2_model_s_tuner(struct file *file, void *fd,
             const struct v4l2_tuner *tuner)
 {
-	pr_info("%s...\n",__func__);
+
     return 0;
 }
 
