@@ -109,7 +109,7 @@
 // for customer can change HDCP state in upper code level, default HDCP is enable
 // default disable this define
 #ifndef DYNAMIC_HDCP_ENABLE_DISABLE
-#define DYNAMIC_HDCP_ENABLE_DISABLE TRUE // TRUE or FALSE		// turn on by AndyNien, 20180105
+#define DYNAMIC_HDCP_ENABLE_DISABLE FALSE // TRUE or FALSE		// turn on by AndyNien, 20180105
 #endif
 
 // DownScale Filter : DownScale Quality setting

@@ -16,6 +16,7 @@
 #include <linux/mempool.h>
 #include <linux/dma-mapping.h>
 #include <linux/dmapool.h>
+#include <linux/vmalloc.h>
 #include "cxt_mgr.h"
 #include "mem_model.h"
 #include "debug.h"
@@ -414,12 +415,20 @@ void mem_model_release_pool(mem_model_pool_handle_t pool_handle)
 
 void *mem_model_new(unsigned int  size)
 {
-    return vmalloc(size);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+    return kvzalloc(size, GFP_KERNEL);
+#else
+    return kmalloc(size, GFP_KERNEL|__GFP_NORETRY);
+#endif
 }
 
 void mem_model_delete(void *buf)
 {
-    if (buf) vfree(buf);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+    if (buf) kvfree(buf);
+#else
+    if (buf) kfree(buf);
+#endif
 }
 
 static void *mem_model_alloc(void)

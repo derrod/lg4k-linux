@@ -56,47 +56,13 @@ typedef struct queue_item_s {
 
 
 
-static inline void init_queue(queue_t *item)
- {
-    item->next= item;
-    item->prev = item;
- }
-
-static inline int queue_empty(queue_t *head)
-{
-    return (head->next == head);
-}
-
-static inline void __queue_add(queue_t *new,queue_t *prev,queue_t *next)
-{
-    next->prev = new;
-    new->next = next;
-    new->prev = prev;
-    prev->next= new;
- }
-
- static inline void queue_add_tail(queue_t *new, queue_t *head)
- {
-     __queue_add(new, head->prev, head);
- } 
-
- static inline void __queue_del(queue_t * prev, queue_t * next)
- {
-         next->prev = prev;
-         prev->next= next;
- } 
- 
-static inline void __queue_del_entry(queue_t *entry)
-{
-        __queue_del(entry->prev, entry->next);
-}
-
-static inline void queue_del(queue_t *entry)
-{
-        __queue_del(entry->prev, entry->next);
-        entry->next = entry;
-        entry->prev = entry;
-}
+void init_queue(queue_t *item);
+int queue_empty(queue_t *head);
+void __queue_add(queue_t *new,queue_t *prev,queue_t *next);
+void queue_add_tail(queue_t *new, queue_t *head);
+void __queue_del(queue_t * prev, queue_t * next);
+void __queue_del_entry(queue_t *entry);
+void queue_del(queue_t *entry);
 
 
 #ifdef __cplusplus

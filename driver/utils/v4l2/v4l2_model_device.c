@@ -180,7 +180,9 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 		    context->pic_bmp_handle = cxt_manager_get_context(cxt_mgr, PCI_BMP_CXT_ID, 0);
 
 		    vdev = &context->vdev;
+#if LINUX_VERSION_CODE > KERNEL_VERSION(4,18,0)
 			vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+#endif
 	        vdev->release = video_device_release_empty;
 	    	vdev->v4l2_dev = &context->v4l2_dev;
 	        vdev->vfl_dir = VFL_DIR_RX;

@@ -10,6 +10,7 @@
  * =================================================================
  */
 #include "typedef.h"
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/videodev2.h>
@@ -71,9 +72,9 @@ enum v4l2_bchs_type {
 	V4L2_BCHS_TYPE_SATURATION,
 };
 
-static struct v4l2_queryctrl g_cx511h_ctrls[] = 
+static struct v4l2_queryctrl g_gc573_ctrls[] =
 {
-	#if 0
+	#if 1
 	{
 		V4L2_CID_BRIGHTNESS,           //id
 		V4L2_CTRL_TYPE_INTEGER,        //type
@@ -148,15 +149,15 @@ static struct v4l2_queryctrl g_cx511h_ctrls[] =
 	#endif
 };
 
-#define ARRAY_SIZE_OF_CTRL		(sizeof(g_cx511h_ctrls)/sizeof(g_cx511h_ctrls[0]))
+#define ARRAY_SIZE_OF_CTRL		(sizeof(g_gc573_ctrls)/sizeof(g_gc573_ctrls[0]))
 
 static struct v4l2_queryctrl *find_ctrl(unsigned int id)
 {
 	int i;
 	//scan supported queryctrl table
 	for( i=0; i<ARRAY_SIZE_OF_CTRL; ++i )
-		if( g_cx511h_ctrls[i].id==id )
-			return &g_cx511h_ctrls[i];
+		if( g_gc573_ctrls[i].id==id )
+			return &g_gc573_ctrls[i];
 
 	return 0;
 }
@@ -234,11 +235,14 @@ int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capabilit
 		    strncpy(cap->card, v4l2m_context->device_info.card_name,sizeof(cap->card));    
         
         sprintf(cap->bus_info, "%s", dev_name(v4l2m_context->dev));
+#if LINUX_VERSION_CODE <= KERNEL_VERSION(4,18,0)
 		if(v4l2m_context->device_info.capabilities)
 		{
-			//cap->device_caps = v4l2_model_to_v4l2_caps(v4l2m_context->device_info.capabilities) ;	
+			cap->device_caps = v4l2_model_to_v4l2_caps(v4l2m_context->device_info.capabilities) ;	
 		}
+#else
 		cap->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+#endif
 		cap->capabilities = cap->device_caps | V4L2_CAP_DEVICE_CAPS;
 	}
 	return 0;
