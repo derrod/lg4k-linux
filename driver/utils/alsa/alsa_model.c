@@ -622,8 +622,10 @@ alsa_model_handle_t alsa_model_init(cxt_mgr_handle_t cxt_mgr, alsa_model_setup_t
             case ALSA_MODEL_REGISTER_SND_CARD_ERROR:
             case ALSA_MODEL_CREATE_PCM_ERR:
                 snd_card_free(card);
+                // fall through
             case ALSA_MODEL_CREATE_SND_CARD_ERROR:
                 cxt_manager_unref_context(alsa_cxt);
+                // fall through
             case ALSA_MODEL_ERROR_ALLOC:
             case ALSA_MODEL_NO_SETUP_INFO:
                 break;

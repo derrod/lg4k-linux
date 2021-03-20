@@ -337,7 +337,6 @@ void *sys_fopen(const char *filename, enum sys_fop_flag_e flag)
 {
     struct file *fp = NULL;
     int new_flag = 0;
-    struct kstat stat;
 
     if (!filename)
     {
@@ -358,7 +357,6 @@ void *sys_fopen(const char *filename, enum sys_fop_flag_e flag)
     else if ((flag & SYS_FOP_FLAG_WRITE_BIT))
         new_flag = O_WRONLY;
 
-
     fp = filp_open(filename, new_flag, 0);
 
     return IS_ERR(fp) ? NULL : fp;
@@ -377,7 +375,7 @@ SIZE_T sys_fread(void *fp, void *buf, SIZE_T size, SIZE_T count, SIZE_T offset)
 
     res = kernel_read(fp, buf, count, &pos);
     if (res == 0) {
-        pr_info("kernel read: read zero bytes\n", res);
+        pr_info("kernel read: read zero bytes\n");
     }
 
     return res;

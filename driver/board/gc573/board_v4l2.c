@@ -209,7 +209,7 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     //ite6805_get_hdcp_state(ite6805_handle, &hdcp_state);
     //ite6805_set_hdcp_state(ite6805_handle, hdcp_state);
 
-    enum ite6805_audio_sample fe_audioinfo=0;
+//    enum ite6805_audio_sample fe_audioinfo=0;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     
     //aver_xilinx_frame_info_t detected_frameinfo;
@@ -375,7 +375,7 @@ static void gc573_stream_off(framegrabber_handle_t handle)
 
 static int gc573_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump) //
 {
-	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
+//	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 	//char version[10];
 	int ret=0;
 		
@@ -386,7 +386,7 @@ static int gc573_flash_dump(framegrabber_handle_t handle,int start_block, int bl
 
 static int gc573_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_update)
 {
-	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
+//	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 	//char version[10];
 	int ret=0;
 	

@@ -346,6 +346,7 @@ void *trace_model_init(void *cxt_mgr)
             {
             case ERR_CREATE_GROUP:
                 kobject_put(trace_cxt->kobj);
+                // fall through
             case ERR_NO_DEV_KOBJ:
                 cxt_manager_unref_context(trace_cxt);
                 trace_cxt = NULL;

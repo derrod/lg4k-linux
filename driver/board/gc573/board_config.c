@@ -206,10 +206,13 @@ int board_probe(struct device *dev,unsigned long driver_info)
         {
             case ERROR_AVER_XILINX:
                 cxt_manager_unref_context(i2c_mgr);
+                // fall through
             case ERROR_I2C_MGR:
                 cxt_manager_unref_context(gpio_mgr);
+                // fall through
             case ERROR_GPIO_MGR:    
                  cxt_manager_unref_context(trace_handle);
+                // fall through
             case ERROR_TRACE_HANDLE:
                 
             case NO_PCI_HANDLE:

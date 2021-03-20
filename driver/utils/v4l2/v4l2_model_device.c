@@ -215,10 +215,13 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 			{
 				case V4L2_MODEL_ERROR_REGISTER_VIDEO:
 					v4l2_model_vb2_release(context->vb2_context);
+					// fall through
 				case V4L2_MODEL_ERROR_VIDEO_BUF:
 					v4l2_device_unregister(&context->v4l2_dev);
+					// fall through
 				case V4L2_MODEL_ERROR_REGISTER_V4L2:
 					kfree(context);
+                    // fall through
 				case V4L2_MODEL_ERROR_ALLOC:
 				case V4L2_MODEL_ERROR_NO_DEV:
 					break;

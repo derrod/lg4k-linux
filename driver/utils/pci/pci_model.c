@@ -273,9 +273,11 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
             case ERROR_REQUEST_REGIONS:
                 pci_clear_master(pci_dev);
                 pci_disable_device(pci_dev);
+                // fall through
             case ERROR_ENABLE_PCI_DEV:
                 cxt_manager_unref_context(pci_cxt);
                 pci_cxt=NULL;
+                // fall through
             case ERROR_ALLOC_CXT:
             case NO_CXT_MGR:
             case NO_DRV_CXT:
