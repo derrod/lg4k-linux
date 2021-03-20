@@ -36,7 +36,7 @@ static void cxt_item_unref(cxt_item_t *cxt_item)
     if (cxt_item->ref_count == 0)
     {
         // char *idc=(char *)&cxt_item->cxt_id;
-        // printk("%s %c%c%c%c\n",__func__,idc[0],idc[1],idc[2],idc[3]);
+        // pr_info("%s %c%c%c%c\n",__func__,idc[0],idc[1],idc[2],idc[3]);
 
         queue_del(&cxt_item->queue);
         if (cxt_item->release)
@@ -93,7 +93,7 @@ void cxt_manager_release(cxt_mgr_handle_t handle)
     }
 
     mem_model_free_buffer(cxt_mgr);
-    //	printk("%s done\n",__func__);
+    //	pr_info("%s done\n",__func__);
 }
 
 void *cxt_manager_add_cxt(cxt_mgr_handle_t handle, U32_T id, cxt_alloc_func_t *alloc_func, cxt_release_func_t *release_func)
@@ -167,7 +167,7 @@ void cxt_manager_ref_context(void *context)
     }
     if (!cxt_mgr)
     {
-        //		printk("%s can't get cxt_mgr from context\n",__func__);
+        //		pr_info("%s can't get cxt_mgr from context\n",__func__);
     }
 }
 
@@ -181,7 +181,7 @@ void *cxt_manager_get_context(cxt_mgr_handle_t handle, U32_T cxt_id, U8_T index)
         
         for_each_queue_entry(pos, &cxt_mgr->cxt_queue, queue)
         {
-            //printk("%s %p %x\n",__func__,pos,pos->cxt_id);
+            //pr_info("%s %p %x\n",__func__,pos,pos->cxt_id);
             if (pos->cxt_id == cxt_id && pos->index == index)
             {
                 found = pos;

@@ -9,6 +9,9 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include "typedef.h"
 #include <linux/version.h>
 #include <linux/module.h>
@@ -113,7 +116,7 @@ static int v4l2_model_qops_queue_setup(struct vb2_queue *q,
 	    framegrabber_g_max_framebuffersize(v4l2m_context->
 					       framegrabber_handle);
 	framegrabber_g_out_framesize(v4l2m_context->framegrabber_handle, &width, &height);	//test
-	printk("%s framebufsize %u, width %d, height %d\n", __func__,
+	pr_info("%s framebufsize %u, width %d, height %d\n", __func__,
 	       framebufsize, width, height);
 	//if (framebufsize == 0)
 	{
@@ -126,7 +129,7 @@ static int v4l2_model_qops_queue_setup(struct vb2_queue *q,
 		    framegrabber_g_out_bytesperline(v4l2m_context->
 						    framegrabber_handle);
 		framebufsize = bytesperline * height;
-		printk("%s >>> framebufsize %u, width %d, height %d\n",
+		pr_info("%s >>> framebufsize %u, width %d, height %d\n",
 		       __func__, framebufsize, width, height);
 	}
 	
@@ -138,12 +141,12 @@ static int v4l2_model_qops_queue_setup(struct vb2_queue *q,
 		framebufsize =
 	    framegrabber_g_max_framebuffersize(v4l2m_context->
 					       framegrabber_handle);
-		printk("===============================================\n");
-		printk("debug framebufsize %u, width %d, height %d\n",
+		pr_info("===============================================\n");
+		pr_info("debug framebufsize %u, width %d, height %d\n",
 	       framebufsize, width, height);
 	}   
 	
-	//printk("%s framebufsize %u, width %d, height %d\n", __func__,
+	//pr_info("%s framebufsize %u, width %d, height %d\n", __func__,
 	//       framebufsize, width, height);
 
 	if (v4l2m_context->pic_bmp_handle)
@@ -170,7 +173,7 @@ static int v4l2_model_qops_queue_setup(struct vb2_queue *q,
 		    *num_buffers;
 		callback_item->callback(&callback_item->data);
 	}
-	printk("%s >>>>>\n", __func__);
+	pr_info("%s >>>>>\n", __func__);
 	return 0;
 }
 
@@ -194,7 +197,7 @@ static int v4l2_model_qops_buf_init(struct vb2_buffer *vb)
 	
 	v4l2m_context->inibuffer_create++;
 	
-	//printk("==%s vb %p ; buffer create++=%d\n", __func__, vb, v4l2m_context->inibuffer_create);
+	//pr_info("==%s vb %p ; buffer create++=%d\n", __func__, vb, v4l2m_context->inibuffer_create);
 	
 	if (callback_item->callback) {
 		v4l2_model_callback_parameter_t *parm = &callback_item->data;
@@ -224,7 +227,7 @@ static int v4l2_model_qops_buf_prepare(struct vb2_buffer *vb)
 	int width, height;
 	int buffer_size = 0;
 
-//	printk("%s >>>>>\n",__func__);
+//	pr_info("%s >>>>>\n",__func__);
 	framegrabber_g_out_framesize(v4l2m_context->framegrabber_handle, &width,
 				     &height);
 	pixfmt =
@@ -236,7 +239,7 @@ static int v4l2_model_qops_buf_prepare(struct vb2_buffer *vb)
 		v4l2_model_buffer_info_t *buffer_info = &v4l2_buf->buffer_info;
 		switch (vb2_cxt->queue_type) {
 		case V4L2_MODEL_BUF_TYPE_VMALLOC:
-//		    printk("%s >>>>>  V4L2_MODEL_BUF_TYPE_VMALLOC\n",__func__);
+//		    pr_info("%s >>>>>  V4L2_MODEL_BUF_TYPE_VMALLOC\n",__func__);
 			buffer_info->buf_count[i] = 1;
 			v4l2_buf->buf_descs[i] =
 			    kzalloc(sizeof(v4l2_model_buf_desc_t) *
@@ -258,13 +261,13 @@ static int v4l2_model_qops_buf_prepare(struct vb2_buffer *vb)
 				struct scatterlist *sg;
 				int j;
 
-//                printk("%s >>>>>  V4L2_MODEL_BUF_TYPE_DMA_SG\n",__func__);
+//                pr_info("%s >>>>>  V4L2_MODEL_BUF_TYPE_DMA_SG\n",__func__);
 
 				buffer_info->buf_count[i] = sgt->nents;
 				
 				if (v4l2m_context->inibuffer_index != 0)
 				{
-					printk("%s >>>>>\n",__func__);
+					pr_info("%s >>>>>\n",__func__);
 					v4l2_buf->buf_descs[i] =
 				    kzalloc(sizeof(v4l2_model_buf_desc_t) *
 					    buffer_info->buf_count[i],GFP_KERNEL);
@@ -275,7 +278,7 @@ static int v4l2_model_qops_buf_prepare(struct vb2_buffer *vb)
 					if (!dma_map_sg
 					    (v4l2m_context->dev, sgt->sgl,
 					     sgt->nents, DMA_FROM_DEVICE))
-						printk("error dma_map_sg\n");
+						pr_err("error dma_map_sg\n");
 #endif
 
 					for_each_sg(sgt->sgl, sg, sgt->nents, j) {
@@ -294,7 +297,7 @@ static int v4l2_model_qops_buf_prepare(struct vb2_buffer *vb)
 			}
 			break;
 		case V4L2_MODEL_BUF_TYPE_DMA_CONT:
-//            printk("%s >>>>>  V4L2_MODEL_BUF_TYPE_DMA_CONT\n",__func__);
+//            pr_info("%s >>>>>  V4L2_MODEL_BUF_TYPE_DMA_CONT\n",__func__);
 			v4l2_buf->buffer_info.buf_count[i] = 1;
 			v4l2_buf->buf_descs[i] =
 			    kzalloc(sizeof(v4l2_model_buf_desc_t) *
@@ -317,8 +320,8 @@ static int v4l2_model_qops_buf_prepare(struct vb2_buffer *vb)
 
 	}
 
-//    printk("%s >>>>>  %dx%d %dbit\n", __func__, width, height, pixfmt->depth);
-//	printk("%s >>>>>  buffer size = %d\n", __func__, buffer_size);
+//    pr_info("%s >>>>>  %dx%d %dbit\n", __func__, width, height, pixfmt->depth);
+//	pr_info("%s >>>>>  buffer size = %d\n", __func__, buffer_size);
 
 	if (callback_item->callback) {
 		v4l2_model_callback_parameter_t *parm = &callback_item->data;
@@ -343,7 +346,7 @@ static void v4l2_model_qops_buf_cleanup(struct vb2_buffer *vb)
 	    container_of(vb, v4l2_model_vb2_buffer_t, vb);
 #endif
 	int i;
-	printk("=====================%s vb %p \n", __func__, vb);
+	pr_info("=====================%s vb %p \n", __func__, vb);
 
 	//return; //rr3
 
@@ -387,7 +390,7 @@ static void v4l2_model_qops_buf_finish(struct vb2_buffer *vb)
 	//v4l2_model_vb2_context_t *vb2_context=(v4l2_model_vb2_context_t *)v4l2m_context->vb2_context;
 	v4l2_model_callback_item_t *callback_item =
 	    &v4l2m_context->callbacks[V4L2_MODEL_CALLBACK_BUFFER_FINISH];
-	//printk("%s vb %p \n", __func__, vb);
+	//pr_info("%s vb %p \n", __func__, vb);
 
 	if (callback_item->callback) {
 		callback_item->callback(&callback_item->data);
@@ -407,7 +410,7 @@ static int v4l2_model_qops_start_streaming(struct vb2_queue *q,
 	    (v4l2_model_vb2_context_t *) v4l2m_context->vb2_context;
 	v4l2_model_callback_item_t *callback_item =
 	    &v4l2m_context->callbacks[V4L2_MODEL_CALLBACK_STREAMON];
-	printk("%s...\n", __func__);
+	pr_info("%s...\n", __func__);
 	if (callback_item->callback) {
 		callback_item->callback(&callback_item->data);
 	}
@@ -439,11 +442,11 @@ static void v4l2_model_qops_stop_streaming(struct vb2_queue *q)
 		callback_item->callback(&callback_item->data);
 	}
 	if (list_empty(&vb2_context->buffer_list)) {
-		printk("%s vb2_context->buffer_list empty\n", __func__);
+		pr_info("%s vb2_context->buffer_list empty\n", __func__);
 	} else {
 		v4l2_model_queue_cancel(v4l2m_context);
 		
-		printk("%s...\n", __func__);
+		pr_info("%s...\n", __func__);
 	}
 	//  v4l2m_context->current_framebuf_info.vbuf_info=NULL;
 	//  v4l2m_context->current_framebuf_info.rcv_size=0;
@@ -477,7 +480,7 @@ static void v4l2_model_qops_buf_queue(struct vb2_buffer *vb)
 #endif
 	v4l2_model_vb2_context_t *vb2_context = v4l2m_context->vb2_context;
 
-	//printk("%s vb %p\n",__func__,vb);
+	//pr_info("%s vb %p\n",__func__,vb);
 	spin_lock_irqsave(&vb2_context->queuelock, flags);
 	list_add_tail(&v4l2_model_buffer->list, &vb2_context->buffer_list);
 	spin_unlock_irqrestore(&vb2_context->queuelock, flags);
@@ -561,7 +564,7 @@ void *v4l2_model_vb2_init(struct vb2_queue *q, v4l2_model_devicetype_t dev_type,
         vb2_context->alloc_ctx = vb2_dma_contig_init_ctx(dev);
         if (!vb2_context->alloc_ctx)
         {
-            printk("vb2_dma_contig_init_ctx fail\n");
+            pr_err("vb2_dma_contig_init_ctx fail\n");
             kfree(vb2_context);
             return NULL;
         }
@@ -578,7 +581,7 @@ void *v4l2_model_vb2_init(struct vb2_queue *q, v4l2_model_devicetype_t dev_type,
         vb2_context->alloc_ctx = vb2_dma_sg_init_ctx(dev);
         if (!vb2_context->alloc_ctx)
         { 
-            printk("vb2_dma_sg_init_ctx fail\n");
+            pr_err("vb2_dma_sg_init_ctx fail\n");
             kfree(vb2_context);
             return NULL;
         }
@@ -595,7 +598,7 @@ void *v4l2_model_vb2_init(struct vb2_queue *q, v4l2_model_devicetype_t dev_type,
 
 	rc = vb2_queue_init(q);
 	if (rc) {
-		printk("%s vb2 queue init failed\n", __func__);
+		pr_err("%s vb2 queue init failed\n", __func__);
 		kfree(vb2_context);
 		return NULL;
 	}
@@ -615,7 +618,7 @@ void v4l2_model_vb2_release(void *context)
             switch (vb2_context->queue_type)
             {
             case V4L2_MODEL_BUF_TYPE_VMALLOC:
-                printk("%s vmalloc should not have alloc_cxt \n", __func__);
+                pr_info("%s vmalloc should not have alloc_cxt \n", __func__);
                 break;
             case V4L2_MODEL_BUF_TYPE_DMA_CONT:
                 vb2_dma_contig_cleanup_ctx(vb2_context->alloc_ctx);
@@ -642,7 +645,7 @@ void v4l2_model_queue_cancel(void *context)
 	    (v4l2_model_vb2_context_t *) v4l2m_context->vb2_context;
 	v4l2_model_vb2_buffer_t *buf;
 	framegrabber_status_bitmask_e framegrabber_status;
-	printk("%s\n", __func__);
+	pr_info("%s\n", __func__);
 	//spin_lock_irqsave(&vb2_context->queuelock, flags);
 	while (!list_empty(&vb2_context->buffer_list)) {
 		struct vb2_buffer *vb;
@@ -655,7 +658,7 @@ void v4l2_model_queue_cancel(void *context)
 #else
 		vb = &buf->vb;
 #endif
-		//printk("%s vb %p done\n",__func__,vb);
+		//pr_info("%s vb %p done\n",__func__,vb);
 		list_del_init(&buf->list);
 		framegrabber_status =
 		    framegrabber_g_status(v4l2m_context->framegrabber_handle);
@@ -668,14 +671,14 @@ void v4l2_model_queue_cancel(void *context)
 
 			vb2_buffer_done(vb, VB2_BUF_STATE_DONE);
 		} else {
-			printk("%s framegrabber_status %08x\n", __func__,
+			pr_info("%s framegrabber_status %08x\n", __func__,
 			       framegrabber_status);
 			vb2_buffer_done(vb, VB2_BUF_STATE_ERROR);
 		}
 
 	}
 	//spin_unlock_irqrestore(&vb2_context->queuelock, flags);
-	printk("%s done\n", __func__);
+	pr_info("%s done\n", __func__);
 }
 
 void v4l2_model_next_buffer(v4l2_model_handle_t context,
@@ -690,7 +693,7 @@ void v4l2_model_next_buffer(v4l2_model_handle_t context,
 
 	spin_lock_irqsave(&vb2_context->queuelock, flags);
 	if (list_empty(&vb2_context->buffer_list)) {
-		//printk("%s vb2 queue is empty\n", __func__);
+		//pr_info("%s vb2 queue is empty\n", __func__);
 		*buffer_info = NULL;
 		spin_unlock_irqrestore(&vb2_context->queuelock, flags);
 		return;
@@ -702,7 +705,7 @@ void v4l2_model_next_buffer(v4l2_model_handle_t context,
 	spin_unlock_irqrestore(&vb2_context->queuelock, flags);
 
 	//vb= &next_buffer->vb;
-	//printk("%s vb %p\n",__func__,vb);
+	//pr_info("%s vb %p\n",__func__,vb);
 	*buffer_info = &next_buffer->buffer_info;
 }
 
@@ -734,7 +737,7 @@ void v4l2_model_buffer_done(v4l2_model_handle_t context)
 	spin_unlock_irqrestore(&vb2_context->queuelock, flags);
 
 	if (!buf) {
-		printk("%s no buffer to serve\n", __func__);
+		pr_info("%s no buffer to serve\n", __func__);
 		return;
 	}
 #if   LINUX_VERSION_CODE >= KERNEL_VERSION(4,5,0)
@@ -782,20 +785,20 @@ void v4l2_model_buffer_done(v4l2_model_handle_t context)
                     int width, height;
                     framegrabber_g_out_framesize(v4l2m_context->framegrabber_handle, &width, &height);
                     load_no_signal_image(v4l2m_context->pic_bmp_handle, vb2_context->image_data, width, height);
-                    printk("load no signal done\n");
+                    pr_info("load no signal done\n");
                 }
                 else if (type == V4L2_MODEL_VB2_IMAGE_COPY_PROTECTION)
                 {
                     int width, height;
                     framegrabber_g_out_framesize(v4l2m_context->framegrabber_handle, &width, &height);
                     load_copy_protection_image(v4l2m_context->pic_bmp_handle, vb2_context->image_data, width, height);
-                    printk("load copy protection done\n");
+                    pr_info("load copy protection done\n");
                 }
                 vb2_context->image_type = type;
             }
 
             ptr = vb2_context->image_data;
-            //printk(".\n");
+            //pr_info(".\n");
         }
 
         if (ptr)
@@ -829,7 +832,7 @@ void v4l2_model_buffer_done(v4l2_model_handle_t context)
 	     FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT)) {
 		vb2_buffer_done(vb, VB2_BUF_STATE_DONE);
 	} else {
-		//printk("%s framegrabber_status %08x\n", __func__, framegrabber_status);
+		//pr_info("%s framegrabber_status %08x\n", __func__, framegrabber_status);
 		vb2_buffer_done(vb, VB2_BUF_STATE_ERROR);
 	}
 }
@@ -849,14 +852,14 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 	framebuffer_info_t *pframebuf_info;
 	//unsigned line;
 	int width, height;
-	//printk("%s %p %p size %ld\n",__func__,context,buffer,size);
+	//pr_info("%s %p %p size %ld\n",__func__,context,buffer,size);
 
 	if (v4l2m_cxt) {
 		pframebuf_info = &v4l2m_cxt->current_framebuf_info;
 		if (!pframebuf_info->vbuf_info) {
 			v4l2_model_next_buffer(v4l2m_cxt,
 					       &pframebuf_info->vbuf_info);
-			//printk("framebuf change to %p\n",pframebuf_info->vbuf_info->plane_vaddr[0]);
+			//pr_info("framebuf change to %p\n",pframebuf_info->vbuf_info->plane_vaddr[0]);
 		}
 
 		framegrabber_g_input_framesize(v4l2m_cxt->framegrabber_handle,
@@ -891,7 +894,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
                                                 memcpy(lb,b,s);\
 					}else \
                                         { \
-                                                printk("copy may out of framebuf size %u offset %lu size %lu !\n",framebuf_size,(unsigned long)(lb-framebuf),(unsigned long)s) ;\
+                                                pr_info("copy may out of framebuf size %u offset %lu size %lu !\n",framebuf_size,(unsigned long)(lb-framebuf),(unsigned long)s) ;\
 					}\
 				}
 
@@ -921,7 +924,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 
 				if (framemode ==
 				    FRAMEGRABBER_FRAMEMODE_PROGRESS) {
-					//printk("Progress line %d offset %d\n",line,line_stride*line);
+					//pr_info("Progress line %d offset %d\n",line,line_stride*line);
 					linebuf = &framebuf[line_stride * line];
 				} else if (framemode ==
 					   FRAMEGRABBER_FRAMEMODE_INTERLACED) {
@@ -937,10 +940,10 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 							      line];
 					}
 
-					//printk("Interlace  line %d offset %d\n",line,bytesperline+line_stride*line);
+					//pr_info("Interlace  line %d offset %d\n",line,bytesperline+line_stride*line);
 
 				}
-				//printk("%dx%dx%d rcv_size %d line %d offset %d line_stride %d bytesperline %d\n",width,height,pix_size,pframebuf_info->rcv_size,line,offset,line_stride,bytesperline);
+				//pr_info("%dx%dx%d rcv_size %d line %d offset %d line_stride %d bytesperline %d\n",width,height,pix_size,pframebuf_info->rcv_size,line,offset,line_stride,bytesperline);
 				frame_remain_size =
 				    (width * height * pix_size) -
 				    pframebuf_info->rcv_size;
@@ -950,7 +953,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 						copy_size = remain_size;
 					copy_to_framebuffer(&linebuf[offset],
 							    buf, copy_size);
-					//printk("memcpy offset %d size %d\n",offset,copy_size);
+					//pr_info("memcpy offset %d size %d\n",offset,copy_size);
 					buf += copy_size;
 					frame_remain_size -= copy_size;
 					remain_size -= copy_size;
@@ -958,12 +961,12 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 					linebuf += line_stride;
 				}
 				do {
-					//printk("remain_size %d frame_remain_size %d\n",remain_size,frame_remain_size);
+					//pr_info("remain_size %d frame_remain_size %d\n",remain_size,frame_remain_size);
 					if (frame_remain_size > remain_size) {
 						copy_size = (width * pix_size);
 
 						while (remain_size >= copy_size) {
-							//printk("%d memcpy %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,copy_size);
+							//pr_info("%d memcpy %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,copy_size);
 							copy_to_framebuffer
 							    (linebuf, buf,
 							     copy_size);
@@ -993,7 +996,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 
 						}
 						if (remain_size) {
-							//printk("%d memcpy  %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,remain_size);
+							//pr_info("%d memcpy  %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,remain_size);
 							copy_to_framebuffer
 							    (linebuf, buf,
 							     remain_size);
@@ -1009,7 +1012,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 						    frame_remain_size;
 						while (frame_remain_size >=
 						       copy_size) {
-							//printk("%d memcpy %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,copy_size);
+							//pr_info("%d memcpy %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,copy_size);
 							copy_to_framebuffer
 							    (linebuf, buf,
 							     copy_size);
@@ -1039,7 +1042,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 
 						}
 						if (frame_remain_size) {
-							//printk("%d memcpy %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,remain_size);
+							//pr_info("%d memcpy %ld(%d) size %d\n",__LINE__,linebuf-framebuf,(linebuf-framebuf)/bytesperline,remain_size);
 							copy_to_framebuffer
 							    (linebuf, buf,
 							     remain_size);
@@ -1061,7 +1064,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 							     vbuf_info);
 							if (pframebuf_info->
 							    vbuf_info == NULL) {
-								printk
+								pr_info
 								    ("No video buffer to receive\n");
 								break;
 							} else {
@@ -1074,7 +1077,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
 								    vbuf_info->
 								    buf_info
 								    [0]->addr;
-								//printk("framebuf change to %p\n",framebuf);
+								//pr_info("framebuf change to %p\n",framebuf);
 								linebuf =
 								    framebuf;
 								frame_remain_size
@@ -1100,7 +1103,7 @@ void v4l2_model_streamoff(v4l2_model_handle_t context)
 {
 	v4l2_model_context_t *v4l2m_context = (v4l2_model_context_t *) context;
 
-	printk("%s\n", __func__);
+	pr_info("%s\n", __func__);
 
 	vb2_streamoff(&v4l2m_context->queue, V4L2_BUF_TYPE_VIDEO_CAPTURE);
 

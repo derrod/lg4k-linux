@@ -9,7 +9,9 @@
  *      Version:
  * =================================================================
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/version.h>
 #include <linux/device.h>
 #include <linux/slab.h>
@@ -455,7 +457,7 @@ static void mem_model_release(void *context)
                 mem_model_dma_buffer_item_t *cur_buffer,*next_buffer;
                 for_each_queue_entry_safe(cur_buffer,next_buffer,&pos->buffer_queue,queue)
                 {
-                    printk("%s %lx size %lx\n",__func__,cur_buffer->dma_buffer.phys_addr,cur_buffer->dma_buffer.size);
+                    pr_info("%s %lx size %lx\n",__func__,cur_buffer->dma_buffer.phys_addr,cur_buffer->dma_buffer.size);
                     mem_model_free_buffer_item(mem_model_cxt,cur_buffer);
                 }
             }

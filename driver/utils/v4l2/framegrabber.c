@@ -9,6 +9,9 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include "typedef.h"
 #include <stdarg.h>
 #include <linux/kernel.h>
@@ -218,7 +221,7 @@ framegrabber_handle_t framegrabber_init(cxt_mgr_handle_t cxt_mgr,framegrabber_pr
 		{
 			if(fg_cxt->pixfmt_cap & (1<<i) )
 			{
-				//printk("%s fg_cxt->current_out_pixfmt=%d\n",__func__,i);
+				//pr_info("%s fg_cxt->current_out_pixfmt=%d\n",__func__,i);
 				fg_cxt->current_out_pixfmt=i;
 				break;
 			}
@@ -358,7 +361,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
 	current_status &= ~mask;
 	current_status |= (status & mask);
 	diff=current_status ^ context->current_status;
-	//printk("%s diff %08x status %08x=>%08x\n",__func__,diff,context->current_status,current_status);
+	//pr_info("%s diff %08x status %08x=>%08x\n",__func__,diff,context->current_status,current_status);
 	context->current_status=current_status;
 
 
@@ -370,7 +373,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
             // streaming status changed from STOP to START, so we have to set streaming on
             if(handle->stream_on)
             {
-                printk("%s stream_on\n",__func__);
+                pr_info("%s stream_on\n",__func__);
                 handle->stream_on(handle);
             }
         }else
@@ -378,7 +381,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
             // streaming status changed from START to STOP, so we have to set streaming off
             if(handle->stream_off)
             {
-                printk("%s stream_off\n",__func__);
+                pr_info("%s stream_off\n",__func__);
                 handle->stream_off(handle);
             }
         }
@@ -391,7 +394,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
             // signal status changed from UNLOCK to LOCK and the current streaming status is START, so we have to set streaming on
             if(handle->stream_on)
             {
-                printk("%s stream_on\n",__func__);
+                pr_info("%s stream_on\n",__func__);
                 handle->stream_on(handle);
             }
         }
@@ -403,14 +406,14 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
 		{
 			if(handle->stream_on)
 			{
-				printk("%s stream_on\n",__func__);
+				pr_info("%s stream_on\n",__func__);
 				handle->stream_on(handle);
 			}
 		}else
 		{
 			if(handle->stream_off)
 			{
-				printk("%s stream_off\n",__func__);
+				pr_info("%s stream_off\n",__func__);
 				handle->stream_off(handle);
 			}
 		}
@@ -602,14 +605,14 @@ void framegrabber_s_input_dualmode(framegrabber_handle_t handle,int dual_pixel)
 int framegrabber_g_input_dualmode(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
-    printk(">>>>>%s ..%d\n",__func__,context->current_dual_pixel);
+    pr_info(">>>>>%s ..%d\n",__func__,context->current_dual_pixel);
 	return context->current_dual_pixel;
 }
 
 int framegrabber_g_input_framerate(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
-    //printk(">>>>>%s ..%d\n",__func__,context->current_framerate);
+    //pr_info(">>>>>%s ..%d\n",__func__,context->current_framerate);
 	return context->current_framerate;
 }
 
@@ -627,7 +630,7 @@ void framegrabber_s_input_framerate(framegrabber_handle_t handle,int framerate,i
 
 	context->current_framerate=framerate;
     context->current_denominator=denominator;
-    //printk(">>>>>%s ..%d\n",__func__,context->current_framerate);
+    //pr_info(">>>>>%s ..%d\n",__func__,context->current_framerate);
 }
 
 void framegrabber_s_out_framerate(framegrabber_handle_t handle,int framerate)
@@ -636,14 +639,14 @@ void framegrabber_s_out_framerate(framegrabber_handle_t handle,int framerate)
 
 	context->current_out_framerate=framerate;
     
-    //printk(">>>>>>%s ..%d\n",__func__,context->current_out_framerate);
+    //pr_info(">>>>>>%s ..%d\n",__func__,context->current_out_framerate);
 }
 
 int framegrabber_g_out_framerate(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
 	
-    //printk(">>>>>>>%s ..%d\n",__func__,context->current_out_framerate);
+    //pr_info(">>>>>>>%s ..%d\n",__func__,context->current_out_framerate);
     
 	return context->current_out_framerate;
 }
@@ -654,14 +657,14 @@ void framegrabber_s_input_audioinfo(framegrabber_handle_t handle,enum framegrabb
 
 	context->current_audioinfo=audioinfo;
   
-    //printk(">>>>>%s ..%d\n",__func__,context->current_audioinfo);
+    //pr_info(">>>>>%s ..%d\n",__func__,context->current_audioinfo);
 }
 
 int framegrabber_g_input_audioinfo(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
 	
-    //printk(">>>>>>>%s ..%d\n",__func__,context->current_audioinfo);
+    //pr_info(">>>>>>>%s ..%d\n",__func__,context->current_audioinfo);
     
 	return context->current_audioinfo;
 }
@@ -674,7 +677,7 @@ int framegrabber_g_input_bchs(framegrabber_handle_t handle,int bchs_select)
     
     //context->current_bchs_selection=*bchs_select;
     
-	//printk("%s current_bchs_value(%d) = %x\n",__func__,context->current_bchs_selection,context->current_bchs_value);
+	//pr_info("%s current_bchs_value(%d) = %x\n",__func__,context->current_bchs_selection,context->current_bchs_value);
 	
 	switch (bchs_select)
 	{
@@ -682,35 +685,35 @@ int framegrabber_g_input_bchs(framegrabber_handle_t handle,int bchs_select)
 		{
 			handle->brightness_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s brightness=%d\n",__func__,*bchs_value);  
+			//pr_info("%s brightness=%d\n",__func__,*bchs_value);
 		    break;
 		}
 		case 1: //contrast
 		{
 			handle->contrast_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s contrast=%d\n",__func__,*bchs_value);   
+			//pr_info("%s contrast=%d\n",__func__,*bchs_value);
 		    break;
 		}
 		case 2: //hue
 		{
 			handle->hue_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s hue=%d\n",__func__,*bchs_value);  
+			//pr_info("%s hue=%d\n",__func__,*bchs_value);
 		    break;
 		}
 		case 3: //saturation
 		{
 			handle->saturation_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s saturation=%d\n",__func__,bchs_value);  
+			//pr_info("%s saturation=%d\n",__func__,bchs_value);
 		    break;
 		}
 		
 	}
 	
 	//context->current_bchs_value = *bchs_value;
-	//printk("%s bchs_value(%d) = %d\n",__func__,context->current_bchs_selection,context->current_bchs_value);
+	//pr_info("%s bchs_value(%d) = %d\n",__func__,context->current_bchs_selection,context->current_bchs_value);
 	return bchs_value;
 	
 }
@@ -731,7 +734,7 @@ void framegrabber_s_input_bchs(framegrabber_handle_t handle,int bchs_value,int b
     if(handle->bchs_set)
 		handle->bchs_set(handle);   
 	
-	printk("%s current_bchs_value(%d) = %d\n",__func__,bchs_select,context->current_bchs_value);
+	pr_info("%s current_bchs_value(%d) = %d\n",__func__,bchs_select,context->current_bchs_value);
 	
     
 }
@@ -743,7 +746,7 @@ int framegrabber_g_hdcp_state(framegrabber_handle_t handle)
 	int state_value=0;
     
     handle->hdcp_state_get(handle,&state_value);
-    printk("%s hdcp state value=%d\n",__func__,state_value);  
+    pr_info("%s hdcp state value=%d\n",__func__,state_value);
 
 	return state_value;
 	
@@ -905,7 +908,7 @@ int framegrabber_g_hdcp_flag(framegrabber_handle_t handle)
     int hdcp_flag;
 	hdcp_flag = context->hdcp_flag;
 	
-	//printk("%s hdcp_flag =%u\n",__func__,hdcp_flag);
+	//pr_info("%s hdcp_flag =%u\n",__func__,hdcp_flag);
 	return hdcp_flag;
 }
 
@@ -915,7 +918,7 @@ void framegrabber_s_hdcp_flag(framegrabber_handle_t handle, unsigned int hdcp_fl
 	
 	context->hdcp_flag = hdcp_flag;
 	
-	//printk("%s hdcp_flag =%u\n",__func__,hdcp_flag);
+	//pr_info("%s hdcp_flag =%u\n",__func__,hdcp_flag);
 }
 
 int framegrabber_g_i2c(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
@@ -923,13 +926,13 @@ int framegrabber_g_i2c(framegrabber_handle_t handle, unsigned char channel, unsi
 	framegrabber_context_t *context = framegrabber_getcontext(handle);
 	if(context == NULL)
 	{
-		printk("param is null!\n");
+		pr_info("param is null!\n");
 		return -1;
 	}
 
 	if(!context->interface.i2c_read)
 	{
-		printk("function pointer is null\n");
+		pr_info("function pointer is null\n");
 		return -1;
 	}
 
@@ -941,13 +944,13 @@ int framegrabber_s_i2c(framegrabber_handle_t handle, unsigned char channel, unsi
 	framegrabber_context_t *context = framegrabber_getcontext(handle);
 	if(context == NULL)
 	{
-		printk("param is null!\n");
+		pr_info("param is null!\n");
 		return -1;
 	}
 
 	if(!context->interface.i2c_write)
 	{
-		printk("function pointer is null\n");
+		pr_info("function pointer is null\n");
 		return -1;
 	}
 
@@ -959,13 +962,13 @@ int framegrabber_g_reg(framegrabber_handle_t handle, unsigned int offset, unsign
     framegrabber_context_t *context = framegrabber_getcontext(handle);
     if(context == NULL)
     {
-        printk("param is null!\n");
+        pr_info("param is null!\n");
         return -1;
     }
 
     if(!context->interface.reg_read)
     {
-        printk("function pointer is null\n");
+        pr_info("function pointer is null\n");
         return -1;
     }
 
@@ -977,13 +980,13 @@ int framegrabber_s_reg(framegrabber_handle_t handle, unsigned int offset, unsign
     framegrabber_context_t *context = framegrabber_getcontext(handle);
     if(context == NULL)
     {
-        printk("param is null!\n");
+        pr_info("param is null!\n");
         return -1;
     }
 
     if(!context->interface.reg_write)
     {
-        printk("function pointer is null\n");
+        pr_info("function pointer is null\n");
         return -1;
     }
 

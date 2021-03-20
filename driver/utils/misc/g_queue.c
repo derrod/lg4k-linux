@@ -9,6 +9,8 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
  
 #include "g_queue.h"
 #include "debug.h"

@@ -9,6 +9,9 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include "typedef.h"
 #include <linux/version.h>
 #include <linux/module.h>
@@ -211,7 +214,7 @@ u32 v4l2_model_to_v4l2_caps(u32 v4l2m_caps)
 	if(v4l2m_caps)
 	{
 		//V4L2_MODEL_DEBUG("Unsupport capabilities!!!\n");	
-		printk("Unsupport capabilities!!!\n");	
+		pr_info("Unsupport capabilities!!!\n");
 	}
 	
 
@@ -223,7 +226,7 @@ int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capabilit
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	
-    //printk("%s...\n",__func__);
+    //pr_info("%s...\n",__func__);
 
 	if(v4l2m_context)
 	{
@@ -253,10 +256,10 @@ int v4l2_model_ioctl_enum_fmt_vid_cap(struct file *file, void *fh, struct v4l2_f
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	U32_T index = f->index;
 
-    //printk("%s...\n",__func__);
+    //pr_info("%s...\n",__func__);
 	if(f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 	{
-		printk("%s.\n",__func__);
+		pr_info("%s.\n",__func__);
 		return -EINVAL;
 	}
 
@@ -274,7 +277,7 @@ int v4l2_model_ioctl_enum_fmt_vid_cap(struct file *file, void *fh, struct v4l2_f
 		else
 		{
 		    pixfmt=framegrabber_g_support_pixelfmt_by_index(v4l2m_context->framegrabber_handle,f->index);
-		    //printk("%s..pixfmt=%d.\n",__func__,f->index);
+		    //pr_info("%s..pixfmt=%d.\n",__func__,f->index);
 		    f->index = index;
 		    f->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		    strlcpy(f->description, pixfmt->name, sizeof(f->description));
@@ -284,7 +287,7 @@ int v4l2_model_ioctl_enum_fmt_vid_cap(struct file *file, void *fh, struct v4l2_f
 		
 		if(pixfmt==NULL)
 			return -EINVAL;
-        //printk("%s....pixfmt=%d.\n",__func__,f->index);
+        //pr_info("%s....pixfmt=%d.\n",__func__,f->index);
 		strlcpy(f->description, pixfmt->name, sizeof(f->description));
 		f->pixelformat=pixfmt->fourcc;
 	}
@@ -306,10 +309,10 @@ int v4l2_model_ioctl_g_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 	{
 		int width,height;
 		//unsigned bytesperline;
-        //printk("%s...\n",__func__);
+        //pr_info("%s...\n",__func__);
 		framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle,&width,&height);
 		//bytesperline=framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle);
-        //printk("%s..f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+        //pr_info("%s..f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
 
 		f->fmt.pix.width=width;
 		f->fmt.pix.height=height;
@@ -330,7 +333,7 @@ int v4l2_model_ioctl_g_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 			//f->fmt.pix.height = height*2;
 			f->fmt.pix.field=V4L2_FIELD_INTERLACED;
 		}
-		//printk("%s....f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+		//pr_info("%s....f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
 		return 0;
 	} 
 
@@ -343,7 +346,7 @@ int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fo
 	const framegrabber_pixfmt_t *fmt;
 	int width,height;
 	BOOL_T interlace_mode;
-    //printk("%s>>f->fmt.pix.width=%d.f->fmt.pix.height=%d.f->fmt.pix.pixelformat=%d\n",__func__,f->fmt.pix.width,f->fmt.pix.height,f->fmt.pix.pixelformat);                  
+    //pr_info("%s>>f->fmt.pix.width=%d.f->fmt.pix.height=%d.f->fmt.pix.pixelformat=%d\n",__func__,f->fmt.pix.width,f->fmt.pix.height,f->fmt.pix.pixelformat);
 	fmt = framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle, f->fmt.pix.pixelformat);
         
 	framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle,&width,&height);
@@ -352,7 +355,7 @@ int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fo
         
     if(!fmt)
     {
-		printk("%s..\n",__func__);
+		pr_info("%s..\n",__func__);
         return 0;
 	}
 
@@ -365,7 +368,7 @@ int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fo
 		        f->fmt.pix.width=width;
 		        //f->fmt.pix.height=height*2;
 		        f->fmt.pix.field =V4L2_FIELD_INTERLACED; //field order
-		        //printk("%s>f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height); 
+		        //pr_info("%s>f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
 		    }
 		    else
 		    {
@@ -380,7 +383,7 @@ int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fo
 			{
 			    //f->fmt.pix.height=height*2;  
 			    f->fmt.pix.field =V4L2_FIELD_INTERLACED;
-			    //printk("%s f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);   
+			    //pr_info("%s f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
 			}
 			else
 			{
@@ -405,7 +408,7 @@ int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fo
 
 	f->fmt.pix.priv = 0;
         
-    //printk("%s<<f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);      
+    //pr_info("%s<<f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
 	return 0;
 
 }
@@ -418,30 +421,30 @@ int v4l2_model_ioctl_s_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 	int ret = v4l2_model_ioctl_try_fmt_vid_cap(file, fh, f);
 	if (ret < 0)
 	{
-		printk("%s..\n",__func__);
+		pr_info("%s..\n",__func__);
 		return ret;
 	}
 
 	if (vb2_is_busy(&v4l2m_context->queue)) {
-		printk("%s.\n",__func__);
+		pr_info("%s.\n",__func__);
 	    return -EBUSY;
 	}
 
 	/* TODO check setting format is supported */
 
-   //printk("%s...\n",__func__);
+   //pr_info("%s...\n",__func__);
 
    if(framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle,f->fmt.pix.pixelformat)==NULL)
    {
-	   printk("..%s..\n",__func__);
+	   pr_info("..%s..\n",__func__);
 	   return -EINVAL;
    }
    if(f->fmt.pix.width==0 || f->fmt.pix.height==0)
    {
-	   printk("..%s.\n",__func__);
+	   pr_info("..%s.\n",__func__);
 	   return -EINVAL;
    }
-   //printk("%s.f->fmt.pix.width=%d..f->fmt.pix.height=%d\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+   //pr_info("%s.f->fmt.pix.width=%d..f->fmt.pix.height=%d\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
    framegrabber_s_out_framesize(v4l2m_context->framegrabber_handle,f->fmt.pix.width,f->fmt.pix.height); 
    framegrabber_s_out_pixelfmt(v4l2m_context->framegrabber_handle,f->fmt.pix.pixelformat); 
 
@@ -454,26 +457,26 @@ int v4l2_model_ioctl_enum_framesizes(struct file *file, void *fh, struct v4l2_fr
 	const framegrabber_pixfmt_t *pixfmt;
 	int width=0,height=0;
 
-    //printk("%s...\n",__func__);
+    //pr_info("%s...\n",__func__);
 	pixfmt=framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle,fsize->pixel_format);
-	//printk("%s %08x %p\n",__func__,fsize->pixel_format,pixfmt);
+	//pr_info("%s %08x %p\n",__func__,fsize->pixel_format,pixfmt);
 	if(pixfmt==NULL)
 	{
-		printk("%s..\n",__func__);
+		pr_info("%s..\n",__func__);
 		return -EINVAL;
 	}
 	else
 	{
-		//printk("%s %08x %x\n",__func__,fsize->pixel_format,pixfmt->fourcc);
+		//pr_info("%s %08x %x\n",__func__,fsize->pixel_format,pixfmt->fourcc);
 	}
 
 	if(framegrabber_g_supportframesize(v4l2m_context->framegrabber_handle,fsize->index,&width,&height)!=FRAMEGRABBER_OK)
 	{
-		//printk("%s. invalid framesize\n",__func__);
+		//pr_info("%s. invalid framesize\n",__func__);
 		return -EINVAL;
 	}
 
-	//printk("%s...supportframesize width=%d height=%d..\n",__func__,width,height); //12
+	//pr_info("%s...supportframesize width=%d height=%d..\n",__func__,width,height); //12
 	fsize->type = V4L2_FRMSIZE_TYPE_DISCRETE;
 	fsize->pixel_format=pixfmt->fourcc;
 	fsize->discrete.width=width;
@@ -485,7 +488,7 @@ int v4l2_model_ioctl_enum_framesizes(struct file *file, void *fh, struct v4l2_fr
 int v4l2_model_ioctl_enum_input(struct file *file, void *fh, struct v4l2_input *inp)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-    printk("%s...\n",__func__);
+    pr_info("%s...\n",__func__);
 	if (inp->index >= framegrabber_g_input_num(v4l2m_context->framegrabber_handle))
 		return -EINVAL;
 	inp->type = V4L2_INPUT_TYPE_CAMERA;
@@ -495,14 +498,14 @@ int v4l2_model_ioctl_enum_input(struct file *file, void *fh, struct v4l2_input *
 	if(inp->index==framegrabber_g_input(v4l2m_context->framegrabber_handle))
 	{
 		u32 input_status=framegrabber_g_input_status(v4l2m_context->framegrabber_handle);
-        //printk("%s..\n",__func__);
+        //pr_info("%s..\n",__func__);
 		if(input_status == FRAMEGRABBER_INPUT_STATUS_OK)
 		{
-			//printk("%s.FRAMEGRABBER_INPUT_STATUS_OK\n",__func__);
+			//pr_info("%s.FRAMEGRABBER_INPUT_STATUS_OK\n",__func__);
 			inp->status=0;
 		}else
 		{
-			//printk("..%s..\n",__func__);
+			//pr_info("..%s..\n",__func__);
 			if(input_status & FRAMEGRABBER_INPUT_STATUS_NO_POWER)
 				inp->status |= V4L2_IN_ST_NO_POWER;
 
@@ -514,7 +517,7 @@ int v4l2_model_ioctl_enum_input(struct file *file, void *fh, struct v4l2_input *
 		}
 	}else
 	{
-		//printk("..%s.\n",__func__);
+		//pr_info("..%s.\n",__func__);
 		inp->status |= V4L2_IN_ST_NO_POWER;
 	}
 	
@@ -525,17 +528,17 @@ int v4l2_model_ioctl_g_input(struct file *file, void *fh, unsigned int *i)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	*i=framegrabber_g_input(v4l2m_context->framegrabber_handle);
-	//printk("%s..input=%d.\n",__func__,*i);
+	//pr_info("%s..input=%d.\n",__func__,*i);
 	return 0;
 }
 
 int v4l2_model_ioctl_s_input(struct file *file, void *fh, unsigned int i)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	//printk("%s...\n",__func__);
+	//pr_info("%s...\n",__func__);
 	if(i < 0 || i > framegrabber_g_input_num(v4l2m_context->framegrabber_handle))
 	{
-		printk("..%s..\n",__func__);
+		pr_info("..%s..\n",__func__);
 		return -EINVAL;
 	}
 
@@ -552,18 +555,18 @@ int v4l2_model_ioctl_enum_frameintervals(struct file *file, void *fh, struct v4l
 
 	
 	interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle); 
-    //printk("%s...\n",__func__);
+    //pr_info("%s...\n",__func__);
 
 	frameinterval=framegrabber_g_framesize_supportrefreshrate(v4l2m_context->framegrabber_handle,fival->width,fival->height,fival->index);
 	if(frameinterval)
 	{
-		//printk("%s..\n",__func__);
+		//pr_info("%s..\n",__func__);
 		fival->type = V4L2_FRMIVAL_TYPE_DISCRETE;
 		fival->discrete.numerator=1;
 		fival->discrete.denominator=frameinterval;
 	}else
 	{
-		//printk("%s.\n",__func__);
+		//pr_info("%s.\n",__func__);
         if(fival->index==0)
         {
 			//frameinterval = framegrabber_g_out_framerate(v4l2m_context->framegrabber_handle);
@@ -584,7 +587,7 @@ int v4l2_model_ioctl_enum_frameintervals(struct file *file, void *fh, struct v4l
 	if (interlace_mode) fival->discrete.denominator /=2;
 	
 	
-    //printk("%s.frameinterval =%d.fival->width=%d.fival->height=%d\n",__func__,frameinterval,fival->width,fival->height);
+    //pr_info("%s.frameinterval =%d.fival->width=%d.fival->height=%d\n",__func__,frameinterval,fival->width,fival->height);
 	return 0;
 }
 
@@ -592,29 +595,29 @@ int v4l2_model_ioctl_g_parm(struct file *file, void *fh,struct v4l2_streamparm *
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	//int current_denominator;
-	//printk("%s...\n",__func__);
+	//pr_info("%s...\n",__func__);
 	if (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 	{
-		printk("%s..\n",__func__);
+		pr_info("%s..\n",__func__);
 	    return -EINVAL;
 	}
 
 	a->parm.capture.capability   = V4L2_CAP_TIMEPERFRAME;
 	a->parm.capture.capturemode  = V4L2_MODE_HIGHQUALITY;
 	a->parm.capture.timeperframe.numerator = 1;
-	//printk("%s>>>>>>>>>denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
+	//pr_info("%s>>>>>>>>>denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
 	a->parm.capture.readbuffers  = 1;
 	//a->parm.capture.timeperframe.denominator = framegrabber_g_out_framerate(v4l2m_context->framegrabber_handle);
-	//printk("%s>>>>>>>>>denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
+	//pr_info("%s>>>>>>>>>denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
 	if ((a->parm.capture.timeperframe.denominator ==0) || (a->parm.capture.timeperframe.denominator >60)) 
 	{
 		a->parm.capture.timeperframe.denominator = framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
-		//printk("%s..io_framerate=%d\n",__func__,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
+		//pr_info("%s..io_framerate=%d\n",__func__,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
 	}else
 	{//
 		//framegrabbe_s_out_framerate(v4l2m_context->framegrabber_handle,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
 		
-		//printk("%s..in_framerate=%d\n",__func__,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
+		//pr_info("%s..in_framerate=%d\n",__func__,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
 	}
     
 	return 0;
@@ -625,24 +628,24 @@ int v4l2_model_ioctl_s_parm(struct file *file, void *fh,struct v4l2_streamparm *
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
 	U32_T io_frame_rate;
 	U32_T in_frame_rate;
-	//printk("%s...a->parm.capture.timeperframe.denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
+	//pr_info("%s...a->parm.capture.timeperframe.denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
 	io_frame_rate = a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator;
 	in_frame_rate = framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
     if ((io_frame_rate  !=0) /*&& (io_frame_rate <=85)*/)
     {
         framegrabber_s_out_framerate(v4l2m_context->framegrabber_handle,io_frame_rate);
         //a->parm.capture.timeperframe.denominator = io_frame_rate;
-        printk("%s set io_framerate= %u\n", __func__, io_frame_rate);
+        pr_info("%s set io_framerate= %u\n", __func__, io_frame_rate);
 	}
 	else
 	{
 		framegrabber_s_out_framerate(v4l2m_context->framegrabber_handle,in_frame_rate);
-		printk("%s set in_framerate= %u\n", __func__, in_frame_rate);
+		pr_info("%s set in_framerate= %u\n", __func__, in_frame_rate);
 	}
    
     
     //framegrabber_s_input_framerate(v4l2m_context->framegrabber_handle,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator,a->parm.capture.timeperframe.denominator); //for test 
-	//printk("%s..%d  %d\n",__func__,a->parm.capture.timeperframe.denominator,a->parm.capture.timeperframe.numerator);
+	//pr_info("%s..%d  %d\n",__func__,a->parm.capture.timeperframe.denominator,a->parm.capture.timeperframe.numerator);
 	return 0;
 }
 
@@ -656,7 +659,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 	//int BCHSinfo;
 	int bchs_select=0;
 	 
-    //printk("%s...ctrl->id=%x\n",__func__,ctrl->id);
+    //pr_info("%s...ctrl->id=%x\n",__func__,ctrl->id);
    
 	//bchs_select = ADV7619_BCHS_DISABLE;
 	
@@ -666,14 +669,14 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		    bchs_select = V4L2_BCHS_TYPE_BRIGHTNESS;
 		    //adv7619_get_bchs(v4l2m_context->adv7619_handle,&BCHSinfo,bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
-            printk("%s...brightness(%d)\n",__func__,ctrl->value);
+            pr_info("%s...brightness(%d)\n",__func__,ctrl->value);
 			ret = 0;
 			break;
 
 		case V4L2_CID_CONTRAST:
 	
 			bchs_select = V4L2_BCHS_TYPE_CONTRAST;
-		    printk("%s...contrast(%d)\n",__func__,bchs_select);
+		    pr_info("%s...contrast(%d)\n",__func__,bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
 			ret = 0;
 			break;
@@ -681,7 +684,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		case V4L2_CID_SATURATION:
 			
 			bchs_select = V4L2_BCHS_TYPE_SATURATION;
-		    printk("%s...saturation(%d)\n",__func__,bchs_select);
+		    pr_info("%s...saturation(%d)\n",__func__,bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
 			ret = 0;
 			break;
@@ -689,7 +692,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		case V4L2_CID_HUE:
 		
 			bchs_select = V4L2_BCHS_TYPE_HUE;
-		    printk("%s...hue(%d)\n",__func__,bchs_select);
+		    pr_info("%s...hue(%d)\n",__func__,bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
 			ret = 0;
 			break; // 
@@ -708,7 +711,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		    else  
 		        ctrl->value = 96000;  
 		
-		    printk("%s...audio(%d)\n",__func__,ctrl->value);
+		    pr_info("%s...audio(%d)\n",__func__,ctrl->value);
 			break;	
 #endif
 #if 0			
@@ -719,12 +722,12 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 			ctrl->value =framegrabber_g_hdcp_state(v4l2m_context->framegrabber_handle);
 		    
 		
-		    printk("%s...hdcp flag(%d)\n",__func__,ctrl->value);
+		    pr_info("%s...hdcp flag(%d)\n",__func__,ctrl->value);
 			break;	
 #endif
 		default:
 		    ctrl->value =0;
-			printk("control id %d not handled\n", ctrl->id);
+			pr_info("control id %d not handled\n", ctrl->id);
 		    break;	
 		
 	}
@@ -734,7 +737,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,&bchs_select);	
 	}
 	#endif
-	//printk("%s...ctrl->value(%d)=%x\n",__func__,bchs_select,ctrl->value);
+	//pr_info("%s...ctrl->value(%d)=%x\n",__func__,bchs_select,ctrl->value);
 	return ret;
 }
 
@@ -749,7 +752,7 @@ int v4l2_model_ioctl_s_ctrl(struct file *file, void *fh,struct v4l2_control *a)
 //	int io_bchs_value=0;
 //	int io_bchs_select=0;
 
-    //printk("%s...\n",__func__);
+    //pr_info("%s...\n",__func__);
 	
 	if( found_ctrl ) {
 		switch( found_ctrl->type ) {
@@ -776,7 +779,7 @@ int v4l2_model_ioctl_s_ctrl(struct file *file, void *fh,struct v4l2_control *a)
 		            break;
                     case V4L2_CID_AUTOGAIN:
                     //framegrabber_s_hdcp_state(v4l2m_context->framegrabber_handle, ctrl->value);
-                    printk("%s...hdcp state(%d)\n",__func__,ctrl->value);
+                    pr_info("%s...hdcp state(%d)\n",__func__,ctrl->value);
                     break;	
 
 	                default:
@@ -789,7 +792,7 @@ int v4l2_model_ioctl_s_ctrl(struct file *file, void *fh,struct v4l2_control *a)
 				ret = 0;
 			} else {
 				//error
-				printk("control %s out of range\n", found_ctrl->name);
+				pr_info("control %s out of range\n", found_ctrl->name);
 			}
 			break;
 #if 0
@@ -801,7 +804,7 @@ int v4l2_model_ioctl_s_ctrl(struct file *file, void *fh,struct v4l2_control *a)
 #endif
 		default:
 			//error
-			printk("control type %d not handled\n", found_ctrl->type);
+			pr_info("control type %d not handled\n", found_ctrl->type);
 			
 		}
 	}
@@ -822,7 +825,7 @@ int v4l2_model_ioctl_queryctrl(struct file *file, void *fh,struct v4l2_queryctrl
 		ctrl->flags = V4L2_CTRL_FLAG_DISABLED;
 	} else {
 		*ctrl = *found_ctrl;
-		printk("control %s\n", found_ctrl->name);
+		pr_info("control %s\n", found_ctrl->name);
 		ret = 0;
 	}
 
@@ -837,7 +840,7 @@ int v4l2_model_ioctl_cropcap(struct file *file, void *fh,struct v4l2_cropcap *a)
 
 	if (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 	{
-		printk("%s..\n",__func__);
+		pr_info("%s..\n",__func__);
 		return -EINVAL;
 	}
   
@@ -871,7 +874,7 @@ int v4l2_model_ioctl_s_hdcp_state(struct file *file,unsigned int *arg)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
     int ret=0;
-    printk("ioctl set hdcp state:%d \n", *arg);
+    pr_info("ioctl set hdcp state:%d \n", *arg);
     framegrabber_s_hdcp_state(v4l2m_context->framegrabber_handle, *arg);
 	return ret;
 }
@@ -882,7 +885,7 @@ int v4l2_model_ioctl_g_flash(struct file *file,struct v4l2_dump_flash *flash_dum
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
     int ret=0;
 
-    printk("%s pad=%d, sb=%d, bs=%d\n", __func__, 
+    pr_info("%s pad=%d, sb=%d, bs=%d\n", __func__,
 		flash_dump->pad, flash_dump->start_block, flash_dump->blocks);
 
 	ret = framegrabber_g_flash(v4l2m_context->framegrabber_handle, flash_dump->start_block, flash_dump->blocks, flash_dump->flash);
@@ -895,7 +898,7 @@ int v4l2_model_ioctl_s_flash(struct file *file,struct v4l2_dump_flash *flash_upd
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
     int ret=0;
 
-    printk("%s pad=%d, sb=%d, bs=%d\n", __func__, 
+    pr_info("%s pad=%d, sb=%d, bs=%d\n", __func__,
 		flash_update->pad, flash_update->start_block, flash_update->blocks);
 #if 1
 	ret = framegrabber_s_flash(v4l2m_context->framegrabber_handle, flash_update->start_block, 
@@ -908,7 +911,7 @@ int v4l2_model_ioctl_s_flash(struct file *file,struct v4l2_dump_flash *flash_upd
 int v4l2_model_ioctl_s_dv_timings(struct file *file, void *fd,
                                 struct v4l2_dv_timings *timings)
 {
-    printk("%s...\n", __func__);
+    pr_info("%s...\n", __func__);
     return 0;
 }
 
@@ -916,49 +919,49 @@ int v4l2_model_ioctl_s_dv_timings(struct file *file, void *fd,
 int v4l2_model_ioctl_g_dv_timings(struct file *file, void *fd,
                                 struct v4l2_dv_timings *timings)
 {
-    printk("%s...\n", __func__);
+    pr_info("%s...\n", __func__);
     return 0;
 }
 
 int v4l2_model_ioctl_enum_std(struct file *file, void *fd,
                                 struct v4l2_standard *std)
 {
-	printk("%s...\n",__func__);
+	pr_info("%s...\n",__func__);
     return -EINVAL;
 }
 
 int v4l2_model_ioctl_s_std(struct file *file, void *fd,
             v4l2_std_id std)
 {
-	printk("%s...\n",__func__);
+	pr_info("%s...\n",__func__);
     return 0;
 }
 
 int v4l2_model_ioctl_g_std(struct file *file, void *fd,
             v4l2_std_id *std)
 {
-	printk("%s...\n",__func__);
+	pr_info("%s...\n",__func__);
     return 0;
 }
 
 int v4l2_model_ioctl_querystd(struct file *file, void *fd,
             v4l2_std_id *std)
 {
-	printk("%s...\n",__func__);
+	pr_info("%s...\n",__func__);
     return 0;
 }
 
 int v4l2_model_g_tuner(struct file *file, void *fd,
             struct v4l2_tuner *tuner)
 {
-	printk("%s...\n",__func__);
+	pr_info("%s...\n",__func__);
     return 0;
 }
 
 int v4l2_model_s_tuner(struct file *file, void *fd,
             const struct v4l2_tuner *tuner)
 {
-	printk("%s...\n",__func__);
+	pr_info("%s...\n",__func__);
     return 0;
 }
 
