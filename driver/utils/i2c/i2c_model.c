@@ -1,3 +1,6 @@
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/i2c.h>
@@ -91,7 +94,7 @@ static void i2c_model_release(void *context)
 					cxt_manager_unref_context(bus->ref_cxt);
 				}
 
-				printk("i2c_del_adapter %p %s\n",&bus->i2c_adap,bus->bus_name);
+				pr_info("i2c_del_adapter %p %s\n",&bus->i2c_adap,bus->bus_name);
 				i2c_del_adapter(&bus->i2c_adap);
 
 				mem_model_free_buffer(bus);
@@ -338,7 +341,7 @@ int i2c_model_add_bus(i2c_model_handle_t handle,const char *bus_name,void *adap,
 				bus->ref_cxt=ref_cxt;
 				cxt_manager_ref_context(ref_cxt);
 			}
-			//printk("%s %p %s\n",__func__,bus->adap,bus->bus_name);
+			//pr_info("%s %p %s\n",__func__,bus->adap,bus->bus_name);
 	}while(0);
 	if(err!=I2C_MODEL_OK)
 	{
@@ -398,7 +401,7 @@ i2c_model_error_e i2c_model_bus_attach_device(i2c_model_handle_t handle,const ch
 		{
 			found=pdriver;
             // SHA204 not ready
-			printk("I2C_MODEL_BUS pdriver->drv_name ok %s and %s\n",pdriver->drv_name,drv_name); //
+			pr_info("I2C_MODEL_BUS pdriver->drv_name ok %s and %s\n",pdriver->drv_name,drv_name); //
 			break;
 		}
 		pdriver++;
@@ -530,7 +533,7 @@ void *i2c_model_get_nth_driver_handle(i2c_model_handle_t handle,const char *drv_
 //	{
 //		if(pos->attach)
 //		{
-//			printk("%s attach\n",pos->drv_name);
+//			pr_info("%s attach\n",pos->drv_name);
 //			pos->attach();
 //		}
 //	}
@@ -546,7 +549,7 @@ void *i2c_model_get_nth_driver_handle(i2c_model_handle_t handle,const char *drv_
 //	{
 //		if(pos->detach)
 //		{
-//			printk("%s detach\n",pos->drv_name);
+//			pr_info("%s detach\n",pos->drv_name);
 //			pos->detach();
 //		}
 //	}

@@ -25,7 +25,7 @@ extern "C" {
 void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id);
 void board_v4l2_suspend(cxt_mgr_handle_t cxt_mgr);
 void board_v4l2_resume(cxt_mgr_handle_t cxt_mgr);
-//void cx511h_adv7619_set_bchs(framegrabber_handle_t handle);
+//void gc573_adv7619_set_bchs(framegrabber_handle_t handle);
 #define BOARD_V4L2_CXT_ID fourcc_id('B','V','4','L')
 
 #ifdef __cplusplus

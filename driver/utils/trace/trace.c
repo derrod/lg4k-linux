@@ -14,6 +14,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
  
 #include <linux/module.h>
 #include <linux/device.h>
@@ -156,7 +158,7 @@ void trace_attr_free(trace_attr_handle_t attr_handle)
 
     if (attr)
     {
-        //		printk("%s %s\n",__func__,attr->attr.attr.name);
+        //		pr_info("%s %s\n",__func__,attr->attr.attr.name);
         if (attr->attr.attr.name)
             mem_model_free_buffer((void *) attr->attr.attr.name);
         queue_del(&attr->queue);
@@ -171,7 +173,7 @@ static __attribute__((unused)) void trace_free_attr_list(trace_context_t *trace_
 
     for_each_queue_entry_safe(attr, tmp, &trace_cxt->attrs_queue, queue)
     {
-        printk("%s %s\n", __func__, attr->attr.attr.name);
+        pr_info("%s %s\n", __func__, attr->attr.attr.name);
         queue_del(&attr->queue);
         //mem_model_free(attr);
     }
@@ -205,12 +207,12 @@ static void trace_update_group(trace_context_t *trace_cxt)
                 i++;
             }
             trace_cxt->attrs[i] = NULL;
-            //printk("%d\n", trace_cxt->attr_count);
+            //pr_info("%d\n", trace_cxt->attr_count);
             for (i = 0; i < trace_cxt->attr_count; i++)
             {
                 if (trace_cxt->attrs[i])
                 {
-                    //printk("[%d] %s\n", i, trace_cxt->attrs[i]->name);
+                    //pr_info("[%d] %s\n", i, trace_cxt->attrs[i]->name);
                 }
 
             }
@@ -218,7 +220,7 @@ static void trace_update_group(trace_context_t *trace_cxt)
         }
         trace_cxt->attr_group.attrs = trace_cxt->attrs;
     }
-    printk("%s done\n", __func__);
+    pr_info("%s done\n", __func__);
 
 }
 
@@ -235,8 +237,6 @@ static void *trace_model_alloc()
 static void trace_model_release(void *cxt)
 {
     trace_context_t *trace_cxt = cxt;
-
-    printk("%s\n", __func__);
 
     if (trace_cxt)
     {
@@ -341,11 +341,12 @@ void *trace_model_init(void *cxt_mgr)
         while (0);
         if (err != NO_ERROR)
         {
-            printk("%s err %d\n", __func__, err);
+            pr_info("%s err %d\n", __func__, err);
             switch (err)
             {
             case ERR_CREATE_GROUP:
                 kobject_put(trace_cxt->kobj);
+                // fall through
             case ERR_NO_DEV_KOBJ:
                 cxt_manager_unref_context(trace_cxt);
                 trace_cxt = NULL;

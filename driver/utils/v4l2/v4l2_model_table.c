@@ -9,6 +9,9 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include "typedef.h"
 #include <linux/kernel.h>
 #include <media/videobuf2-core.h>

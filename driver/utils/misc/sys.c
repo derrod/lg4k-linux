@@ -9,7 +9,10 @@
  *      Version:
  * =================================================================
  */
- #include "typedef.h"
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
+#include "typedef.h"
 #include <linux/version.h>
 #include <linux/kernel.h>
 #include <linux/mutex.h>
@@ -87,10 +90,10 @@ int sys_sscanf(const char *buf, const char *fmt, ...)
 
 unsigned long long sys_gettimestamp()
 {
-    struct timespec ts;
+    struct timespec64 ts;
     unsigned long long timestamp;
     
-    ktime_get_ts(&ts);
+    ktime_get_ts64(&ts);
     timestamp=ts.tv_sec ;
     timestamp*=1000000000;
     timestamp+=ts.tv_nsec;
@@ -334,17 +337,16 @@ void *sys_fopen(const char *filename, enum sys_fop_flag_e flag)
 {
     struct file *fp = NULL;
     int new_flag = 0;
-    struct kstat stat;
 
     if (!filename)
     {
-        printk("Error: NULL pointer");
+        pr_err("Error: NULL pointer");
         return NULL;
     }
 
     if (flag & ~SYS_FOP_FLAG_BIT_MASK)
     {
-        printk("Error: the flag is not supported ");
+        pr_err("Error: the flag is not supported ");
         return NULL;
     }
 
@@ -354,10 +356,6 @@ void *sys_fopen(const char *filename, enum sys_fop_flag_e flag)
         new_flag = O_RDONLY;
     else if ((flag & SYS_FOP_FLAG_WRITE_BIT))
         new_flag = O_WRONLY;
-
-    if (0 == vfs_stat(filename, &stat))
-        printk("file size:%lld", stat.size);
-
 
     fp = filp_open(filename, new_flag, 0);
 
@@ -372,21 +370,13 @@ void sys_fclose(void *fp)
 
 SIZE_T sys_fread(void *fp, void *buf, SIZE_T size, SIZE_T count, SIZE_T offset)
 {
-    mm_segment_t fs;
     loff_t pos = offset;
     SIZE_T res;
 
-    fs =get_fs();
-    set_fs(KERNEL_DS);
-
-//    vfs_read(fp, buf, count, &pos);
-    res = vfs_read(fp, buf, count, &pos);
-    if (res > 0) {
-//        ((struct file*)fp)->f_pos = pos;
-//        printk("read size:%d", (int)res);
+    res = kernel_read(fp, buf, count, &pos);
+    if (res == 0) {
+        pr_info("kernel read: read zero bytes\n");
     }
-
-    set_fs(fs);
 
     return res;
 }

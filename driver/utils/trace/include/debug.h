@@ -27,29 +27,32 @@
 extern "C" {
 #endif
 
-#define DEBUG 1    
+
+
+#define DEBUG 1
 
 int mesg(const char *fmt,...);
+
 #define mesg_info(fmt, ...) \
-        mesg(KERN_INFO fmt, ##__VA_ARGS__)
+        pr_info(fmt, ##__VA_ARGS__)
 #define mesg_emerg(fmt, ...) \
-        mesg(KERN_EMERG fmt, ##__VA_ARGS__)
+        pr_emerg(fmt, ##__VA_ARGS__)
 #define mesg_alert(fmt, ...) \
-        mesg(KERN_ALERT fmt, ##__VA_ARGS__)
+        pr_alert(fmt, ##__VA_ARGS__)
 #define mesg_crit(fmt, ...) \
-        mesg(KERN_CRIT fmt, ##__VA_ARGS__)
+        pr_crit(fmt, ##__VA_ARGS__)
 #define mesg_err(fmt, ...) \
-        mesg(KERN_ERR fmt, ##__VA_ARGS__)
+        pr_err(fmt, ##__VA_ARGS__)
 #define mesg_warning(fmt, ...) \
-        mesg(KERN_WARNING fmt, ##__VA_ARGS__)
+        pr_warning(fmt, ##__VA_ARGS__)
 #define mesg_notice(fmt, ...) \
-        mesg(KERN_NOTICE fmt, ##__VA_ARGS__)
+        pr_notice(fmt, ##__VA_ARGS__)
 #if DEBUG
 #define mesg_debug(fmt, ...) \
         debug_msg(KERN_DEBUG fmt, ##__VA_ARGS__)
-
 #else
-#define mesg_debug(fmt, ...)
+#define mesg_debug(fmt, ...) \
+        pr_debug(fmt, ##__VA_ARGS__)
 #endif
 
 typedef enum

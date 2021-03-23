@@ -9,7 +9,9 @@
  *      Version:
  * =================================================================
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/kernel.h>
 #include <linux/version.h>
 #include <linux/workqueue.h>
@@ -113,17 +115,17 @@ static void alsa_model_release(void *context)
 {
     alsa_model_t *alsa_cxt = context;
 
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
     if (alsa_cxt)
     {
         if (alsa_cxt->card)
         {
             snd_card_free(alsa_cxt->card);
-            printk("%s snd_card_free \n", __func__);
+            pr_info("%s snd_card_free \n", __func__);
         }
         kfree(alsa_cxt);
     }
-    printk("%s done\n", __func__);
+    pr_info("%s done\n", __func__);
 
 }
 #if 1
@@ -168,7 +170,7 @@ static int alsa_model_pcm_open(struct snd_pcm_substream *substream)
     struct snd_pcm_runtime *runtime = substream->runtime;
     alsa_cb_info_t *cb_info = NULL;
 
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
 
     alsa_cxt->substream = substream;
     runtime->hw = alsa_cxt->hw_parm;
@@ -202,7 +204,7 @@ static int alsa_model_pcm_close(struct snd_pcm_substream *substream)
 
 static int alsa_model_hw_params(struct snd_pcm_substream *substream, struct snd_pcm_hw_params *hw_params)
 {
-    printk("%s() alloc buffer size = %u"" periods = %u period_bytes = %u\n", __func__, params_buffer_bytes(hw_params), params_periods(hw_params), params_period_bytes(hw_params));
+    pr_info("%s() alloc buffer size = %u"" periods = %u period_bytes = %u\n", __func__, params_buffer_bytes(hw_params), params_periods(hw_params), params_period_bytes(hw_params));
 
     if (substream->runtime->dma_area)
     {
@@ -214,7 +216,7 @@ static int alsa_model_hw_params(struct snd_pcm_substream *substream, struct snd_
 
 static int alsa_model_hw_free(struct snd_pcm_substream *substream)
 {
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
 
     if (substream->runtime->dma_area)
     {
@@ -230,7 +232,7 @@ static int alsa_model_prepare(struct snd_pcm_substream *substream)
 {
     alsa_model_t *alsa_cxt = snd_pcm_substream_chip(substream);
 
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
 
     alsa_cxt->capture_transfer_done = 0;
     alsa_cxt->hwptr = 0;
@@ -243,7 +245,7 @@ static int alsa_model_card_trigger(struct snd_pcm_substream *substream, int cmd)
     alsa_model_t *alsa_cxt = snd_pcm_substream_chip(substream);
     alsa_cb_info_t *cb_info = NULL;
 
-    printk("%s %p\n", __func__,substream);
+    pr_info("%s %p\n", __func__,substream);
 
     switch (cmd)
     {
@@ -281,7 +283,7 @@ static snd_pcm_uframes_t alsa_model_pointer(struct snd_pcm_substream *substream)
     spin_lock_irqsave(&alsa_cxt ->slock, flags);
     hwptr = alsa_cxt ->hwptr;
     spin_unlock_irqrestore(&alsa_cxt ->slock, flags);
-//    printk("%s %d\n",__func__,hwptr);
+//    pr_info("%s %d\n",__func__,hwptr);
 
     return hwptr;
 }
@@ -302,33 +304,33 @@ void alsa_model_feed_data(alsa_model_handle_t handle, U8_T *buf, SIZE_T length)
 
     bool period_elapsed = false;
     //  int i;
-    // printk("%s %d: ",__func__,length);
+    // pr_info("%s %d: ",__func__,length);
     // for(i=0;i<16;i++)
     // {
-    // 	printk("%02x ",buf[i]);
+    // 	pr_info("%02x ",buf[i]);
     // }
-    // printk("\n");
+    // pr_info("\n");
 
     if (!alsa_cxt->substream)
     {
-        //    	printk("NO substream\n");
+        //    	pr_info("NO substream\n");
         return;
     }
 
     if (!length)
     {
-        printk("NO length\n");
+        pr_info("NO length\n");
         return;
     }
     if (!alsa_cxt->substream->runtime)
     {
-        printk("NO runtime\n");
+        pr_info("NO runtime\n");
         return;
 
     }
     if (!alsa_cxt->substream->runtime->frame_bits)
     {
-        printk("frame_bits 0\n");
+        pr_info("frame_bits 0\n");
         return;
     }
 
@@ -340,7 +342,7 @@ void alsa_model_feed_data(alsa_model_handle_t handle, U8_T *buf, SIZE_T length)
     /* bytes to copy_frames */
     remain_frames = length / stride;
     copy_frames = remain_frames;
-    //printk("alsa stride:%d remain:%d copy:%d \n", stride, remain_frames, copy_frames);
+    //pr_info("alsa stride:%d remain:%d copy:%d \n", stride, remain_frames, copy_frames);
     /*    
         if(oldptr)
         {
@@ -620,8 +622,10 @@ alsa_model_handle_t alsa_model_init(cxt_mgr_handle_t cxt_mgr, alsa_model_setup_t
             case ALSA_MODEL_REGISTER_SND_CARD_ERROR:
             case ALSA_MODEL_CREATE_PCM_ERR:
                 snd_card_free(card);
+                // fall through
             case ALSA_MODEL_CREATE_SND_CARD_ERROR:
                 cxt_manager_unref_context(alsa_cxt);
+                // fall through
             case ALSA_MODEL_ERROR_ALLOC:
             case ALSA_MODEL_NO_SETUP_INFO:
                 break;

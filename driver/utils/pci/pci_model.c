@@ -9,7 +9,9 @@
  *      Version:
  * =================================================================
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/kernel.h>
 #include "linux/pci.h"
 #include "linux/interrupt.h"
@@ -129,7 +131,7 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
         ERROR_REQUEST_IRQ,
     }err=NO_ERROR;
 
-    printk("pci_model_probe prepare\n");
+    pr_info("pci_model_probe prepare\n");
     do
     {
         if(!pci_model_drv_cxt)
@@ -168,11 +170,11 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
             
             if(!pci_set_dma_mask(pci_dev, DMA_BIT_MASK(64)))
             {
-                mesg_info("set 64bit DMA mask\n");
+                pr_info("set 64bit DMA mask\n");
             }else 
                 if(!pci_set_dma_mask(pci_dev, DMA_BIT_MASK(32)))
             {
-                mesg_info("set 32bit DMA mask\n");
+                pr_info("set 32bit DMA mask\n");
             }else
             {
                 
@@ -184,7 +186,7 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
         {
             if(!pci_set_dma_mask(pci_dev, DMA_BIT_MASK(32)))
             {
-                mesg_info("set 32bit DMA mask\n");
+                pr_info("set 32bit DMA mask\n");
                 
             }else
             {
@@ -239,10 +241,10 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
                 bar_info->phys_addr=phys_addr;
                 bar_info->size=size;
                 bar_info->mmio=mmio;
-                mesg_debug("%s ioremap %08x size %x to %p\n",__func__,phys_addr,size,mmio);
+                mesg_debug("%s ioremap %08llx size %llx to %p\n",__func__,phys_addr,size,mmio);
             }else
             {
-                mesg_err("%s ioremap %08x size %x error\n",__func__,phys_addr,size);
+                mesg_err("%s ioremap %08llx size %llx error\n",__func__,phys_addr,size);
             }
             
             pci_cxt->bar_count++;
@@ -252,12 +254,12 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
         
         subsystem_id = sub_system;
         
-        printk("%s sub_id=%x\n",__func__,sub_system);
+        pr_info("%s sub_id=%x\n",__func__,sub_system);
            
         if(pci_model_drv_cxt->probe_func)
         {
             ret=pci_model_drv_cxt->probe_func(dev,driver_data->driver_data);
-            printk("board_probe=%d\n",ret);
+            pr_info("board_probe=%d\n",ret);
 		}
     
         
@@ -265,15 +267,17 @@ static int pci_model_probe(struct pci_dev *pci_dev,const struct pci_device_id *p
     if(err!=NO_ERROR)
     {
         mesg_err("%s error %d\n",__func__,err);
-        printk("pci_model_probe fail\n");
+        pr_err("pci_model_probe fail\n");
         switch(err)
         {      
             case ERROR_REQUEST_REGIONS:
                 pci_clear_master(pci_dev);
                 pci_disable_device(pci_dev);
+                // fall through
             case ERROR_ENABLE_PCI_DEV:
                 cxt_manager_unref_context(pci_cxt);
                 pci_cxt=NULL;
+                // fall through
             case ERROR_ALLOC_CXT:
             case NO_CXT_MGR:
             case NO_DRV_CXT:
@@ -597,7 +601,7 @@ void pci_model_register_isr(pci_model_handle_t handle,pci_model_irq_func_t irq_f
 int pci_model_driver_init(pci_model_driver_setup_t *pcidrv_setup)
 {
 	int err; 
-	printk("pci_model_driver_init\n");
+	pr_info("pci_model_driver_init\n");
     if(pci_model_drv_cxt==NULL)
     {
         pci_model_drv_cxt=mem_model_alloc_buffer(sizeof(pci_model_driver_cxt_t));
@@ -636,7 +640,7 @@ int pci_model_driver_init(pci_model_driver_setup_t *pcidrv_setup)
                             if(id_setup->device)
                             {   
                                 id->device=id_setup->device;
-                                printk("id->device=%02x\n",id->device);
+                                pr_info("id->device=%02x\n",id->device);
 							}
                             else
                                 id->device=PCI_ANY_ID;
@@ -672,11 +676,11 @@ int pci_model_driver_init(pci_model_driver_setup_t *pcidrv_setup)
             err = pci_register_driver(&pci_model_drv_cxt->driver);
             if (err ==0)
             {
-				printk(">>>pci_register_driver ok\n"); 
+				pr_info(">>>pci_register_driver ok\n");
 			}
             else
             {
-				printk(">>>pci_register_driver fail\n");
+				pr_err(">>>pci_register_driver fail\n");
 			}
 			//pcidrv_setup->subsystem_id = subsystem_id;
 			

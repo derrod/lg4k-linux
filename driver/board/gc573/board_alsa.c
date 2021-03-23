@@ -29,12 +29,12 @@ typedef struct
     BASIC_CXT_HANDLE_DECLARE;
     alsa_model_handle_t alsa_handle;
     handle_t aver_xilinx_handle;
-    handle_t i2c_chip_handle[CL511H_I2C_CHIP_COUNT];
+    handle_t i2c_chip_handle[GC573_I2C_CHIP_COUNT];
 }board_alsa_cxt_t;
 
-static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
+static board_chip_desc_t gc573_chip_desc[GC573_I2C_CHIP_COUNT]=
 {
-        [CL511H_I2C_CHIP_ITE6805_0]=
+        [GC573_I2C_CHIP_ITE6805_0]=
         {
             .name=ITE6805_DRVNAME,
             .index=1,
@@ -42,9 +42,9 @@ static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
 
 };
 
-static alsa_model_pcm_info_t cl511h_pcm_info=
+static alsa_model_pcm_info_t gc573_pcm_info=
 {
-	.name="cl511h capture pcm",
+	.name="gc573 capture pcm",
 	.capture_count=1,
 
 };
@@ -76,7 +76,7 @@ static void board_alsa_capture_start(void *data)
 {
     board_alsa_cxt_t *board_alsa=data;
     aver_xilinx_audio_cbinfo_t audio_cbinfo;
-    //handle_t ite6805_handle=board_alsa->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    //handle_t ite6805_handle=board_alsa->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     //enum ite6805_audio_sample fe_audioinfo=0;
     //aver_xilinx_audio_cfg_t cfg;
     
@@ -126,11 +126,11 @@ void board_alsa_init(cxt_mgr_handle_t cxt_mgr)
 			break;
 		}
 		if (subsystem_id == 0x5730)
-		    alsa_info.name="AVerMedia CL511H";
-		alsa_info.pcm_count=sizeof(cl511h_pcm_info)/sizeof(alsa_model_pcm_info_t);
+		    alsa_info.name="AVerMedia GC573";
+		alsa_info.pcm_count=sizeof(gc573_pcm_info)/sizeof(alsa_model_pcm_info_t);
 		alsa_info.support_fmt_mask=BIT_ALSA_MODEL_FMT_S16_LE | BIT_ALSA_MODEL_FMT_S24_LE;
 		alsa_info.support_rate_mask=BIT_ALSA_MODEL_RATE_32K|BIT_ALSA_MODEL_RATE_44_1K|BIT_ALSA_MODEL_RATE_48K| BIT_ALSA_MODEL_RATE_96K | BIT_ALSA_MODEL_RATE_192K;
-		alsa_info.pcm_info=&cl511h_pcm_info;
+		alsa_info.pcm_info=&gc573_pcm_info;
                 alsa_info.period_size=7680*4;//12*1024;
                 alsa_info.max_period_num=128;        
 		board_alsa->alsa_handle=alsa_model_init(cxt_mgr,&alsa_info);
@@ -155,9 +155,9 @@ void board_alsa_init(cxt_mgr_handle_t cxt_mgr)
             break;
         }
 
-        for(i=0;i<CL511H_I2C_CHIP_COUNT;i++)
+        for(i=0;i<GC573_I2C_CHIP_COUNT;i++)
         {
-            board_alsa->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,cl511h_chip_desc[i].name,cl511h_chip_desc[i].index);
+            board_alsa->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,gc573_chip_desc[i].name,gc573_chip_desc[i].index);
             debug_msg("board_alsa i2c_chip_handle[%d] %p\n",i,board_alsa->i2c_chip_handle[i]);
         }
 

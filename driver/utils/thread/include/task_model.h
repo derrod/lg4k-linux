@@ -24,7 +24,7 @@ extern "C" {
     
     #define TASK_MODEL_CXT_ID fourcc_id('T','A','S','K')
 
-    typedef void (*task_work_func_t)(void *data);
+    typedef void (*task_worker_func_t)(void *data);
     typedef void (*task_done_callback_func_t)(void *data);
     typedef void *task_model_handle_t;
     typedef void *task_handle_t;
@@ -33,7 +33,7 @@ extern "C" {
     task_model_handle_t task_model_init(cxt_mgr_handle_t cxt_mgr);
     
     void task_model_stop_task(task_model_handle_t task_model_handle,task_handle_t task_handle);
-    task_handle_t task_model_create_task(task_model_handle_t task_model_handle,task_work_func_t work_func,void *work_cxt,const char *name);
+    task_handle_t task_model_create_task(task_model_handle_t task_model_handle,task_worker_func_t work_func,void *work_cxt,const char *name);
     void task_model_release_task(task_model_handle_t task_model_handle,task_handle_t task_handle);
     void task_model_run_task(task_model_handle_t task_model_handle,task_handle_t task_handle);
     void task_model_run_task_after(task_model_handle_t task_model_handle,task_handle_t task_handle,unsigned int us);

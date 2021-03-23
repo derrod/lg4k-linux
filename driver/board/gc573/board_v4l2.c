@@ -36,7 +36,7 @@ typedef struct
         i2c_model_handle_t i2c_model_handle;
         task_model_handle_t task_model_handle;
         handle_t aver_xilinx_handle;
-        handle_t i2c_chip_handle[CL511H_I2C_CHIP_COUNT];
+        handle_t i2c_chip_handle[GC573_I2C_CHIP_COUNT];
         ite6805_frameinfo_t cur_fe_frameinfo;
         enum ite6805_audio_sample cur_fe_audioinfo;
         int cur_bchs_value;
@@ -45,9 +45,9 @@ typedef struct
         int board_id;
 }board_v4l2_context_t;
 
-static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
+static board_chip_desc_t gc573_chip_desc[GC573_I2C_CHIP_COUNT]=
 {
-        [CL511H_I2C_CHIP_ITE6805_0]=
+        [GC573_I2C_CHIP_ITE6805_0]=
         {
             .name=ITE6805_DRVNAME,
             .index=1,
@@ -55,9 +55,9 @@ static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
     
 };
 
-static framegrabber_setup_input_info_t cl511h_input_info[] =
+static framegrabber_setup_input_info_t gc573_input_info[] =
 {
-    [CL511H_HDMI_INPUT] =
+    [GC573_HDMI_INPUT] =
     {
         .name = "HDMI",
         .support_framesize_info =
@@ -86,15 +86,15 @@ static framegrabber_setup_input_info_t cl511h_input_info[] =
                                     | REFRESHRATE_25_BIT | REFRESHRATE_24_BIT,                       
         },
     },
-    [CL511H_INPUT_COUNT] =
+    [GC573_INPUT_COUNT] =
     {
 		.name = NULL,
 	},
 };
 
-static framegrabber_property_t  cl511h_property={
-		.name="CL511H",
-		.input_setup_info=cl511h_input_info,
+static framegrabber_property_t  gc573_property={
+		.name="GC573",
+		.input_setup_info=gc573_input_info,
 		.support_out_pixfmt_mask=FRAMEGRABBER_PIXFMT_BITMSK,//FRAMEGRABBER_PIXFMT_YUYV_BIT ,  //tt 0615
 		//.max_supported_line_width=3840,
 		//.max_supported_line_width=4096,
@@ -105,51 +105,51 @@ static framegrabber_property_t  cl511h_property={
 static v4l2_model_device_setup_t device_info=
 {
     .type = DEVICE_TYPE_GRABBER,
-    .driver_name="CL511H",
-    .card_name="AVerMedia CL511H",
+    .driver_name="GC573",
+    .card_name="AVerMedia GC573",
     .capabilities= V4L2_MODEL_CAPS_CAPTURE_BIT | V4L2_MODEL_CAPS_READWRITE_BIT | V4L2_MODEL_CAPS_STREAMING_BIT,
     .buffer_type=V4L2_MODEL_BUF_TYPE_DMA_SG,
 };
 
 static void *board_v4l2_alloc(void);
 static void board_v4l2_release(void *cxt);
-static void cx511h_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info);
-static void cx511h_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info);
-static void cx511h_stream_on(framegrabber_handle_t handle);
-static void cx511h_stream_off(framegrabber_handle_t handle);
-//static void cx511h_bchs_read(framegrabber_handle_t handle);
-static void cx511h_bchs_write(framegrabber_handle_t handle);
-static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness);
-static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast);
-static void cx511h_hue_read(framegrabber_handle_t handle,int *hue);
-static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation);
-static void cx511h_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state);
-static void cx511h_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state);
-static int cx511h_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
-static int cx511h_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
-static int cx511h_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data);
-static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data);
+static void gc573_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info);
+static void gc573_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info);
+static void gc573_stream_on(framegrabber_handle_t handle);
+static void gc573_stream_off(framegrabber_handle_t handle);
+//static void gc573_bchs_read(framegrabber_handle_t handle);
+static void gc573_bchs_write(framegrabber_handle_t handle);
+static void gc573_brightness_read(framegrabber_handle_t handle,int *brightness);
+static void gc573_contrast_read(framegrabber_handle_t handle,int *contrast);
+static void gc573_hue_read(framegrabber_handle_t handle,int *hue);
+static void gc573_saturation_read(framegrabber_handle_t handle,int *saturation);
+static void gc573_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state);
+static void gc573_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state);
+static int gc573_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
+static int gc573_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
+static int gc573_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data);
+static int gc573_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data);
 
-static int cx511h_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
-static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
+static int gc573_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
+static int gc573_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
 
-static framegrabber_interface_t cx511h_ops={
-    .stream_on      = cx511h_stream_on,
-    .stream_off     = cx511h_stream_off,
-    //.bchs_get     = cx511h_bchs_read,
-    .brightness_get = cx511h_brightness_read,
-    .contrast_get   = cx511h_contrast_read,
-    .hue_get        = cx511h_hue_read,
-    .saturation_get = cx511h_saturation_read,
-    .bchs_set       = cx511h_bchs_write,
-    .flash_read     = cx511h_flash_dump,
-    .flash_update   = cx511h_flash_update,
-    .hdcp_state_get = cx511h_hdcp_state_read,
-    .hdcp_state_set  = cx511h_hdcp_state_set,
-    .i2c_read = cx511h_i2c_read,
-    .i2c_write = cx511h_i2c_write,
-    .reg_read = cx511h_reg_read,
-    .reg_write = cx511h_reg_write,
+static framegrabber_interface_t gc573_ops={
+    .stream_on      = gc573_stream_on,
+    .stream_off     = gc573_stream_off,
+    //.bchs_get     = gc573_bchs_read,
+    .brightness_get = gc573_brightness_read,
+    .contrast_get   = gc573_contrast_read,
+    .hue_get        = gc573_hue_read,
+    .saturation_get = gc573_saturation_read,
+    .bchs_set       = gc573_bchs_write,
+    .flash_read     = gc573_flash_dump,
+    .flash_update   = gc573_flash_update,
+    .hdcp_state_get = gc573_hdcp_state_read,
+    .hdcp_state_set  = gc573_hdcp_state_set,
+    .i2c_read = gc573_i2c_read,
+    .i2c_write = gc573_i2c_write,
+    .reg_read = gc573_reg_read,
+    .reg_write = gc573_reg_write,
 };
 
 static void *board_v4l2_alloc()
@@ -177,7 +177,7 @@ static void board_v4l2_release(void *cxt)
 	}
 }
 
-static void cx511h_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     
@@ -185,13 +185,13 @@ static void cx511h_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info)
 
 }
 
-static void cx511h_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     debug_msg("%s %p\n",__func__,board_v4l2_cxt);
     
 }
-static void cx511h_stream_on(framegrabber_handle_t handle)
+static void gc573_stream_on(framegrabber_handle_t handle)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
     aver_xilinx_video_process_cfg_t vip_cfg;
@@ -204,12 +204,12 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     framegrabber_framemode_e framemode;
     const framegrabber_pixfmt_t *pixfmt=framegrabber_g_out_pixelfmt(handle);
     
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
     //ite6805_get_hdcp_state(ite6805_handle, &hdcp_state);
     //ite6805_set_hdcp_state(ite6805_handle, hdcp_state);
 
-    enum ite6805_audio_sample fe_audioinfo=0;
+//    enum ite6805_audio_sample fe_audioinfo=0;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     
     //aver_xilinx_frame_info_t detected_frameinfo;
@@ -362,10 +362,10 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     //ite6805_set_freerun_screen(ite6805_handle,FALSE);    
 }
 
-static void cx511h_stream_off(framegrabber_handle_t handle)
+static void gc573_stream_off(framegrabber_handle_t handle)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 	
 	//debug_msg(">>>>>>>>>>>%s...\n",__func__);
 	//ite6805_set_freerun_screen(ite6805_handle,TRUE);
@@ -373,9 +373,9 @@ static void cx511h_stream_off(framegrabber_handle_t handle)
     aver_xilinx_enable_video_streaming(board_v4l2_cxt->aver_xilinx_handle,FALSE);
 }
 
-static int cx511h_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump) //
+static int gc573_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump) //
 {
-	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
+//	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 	//char version[10];
 	int ret=0;
 		
@@ -384,9 +384,9 @@ static int cx511h_flash_dump(framegrabber_handle_t handle,int start_block, int b
     return ret;
 }
 
-static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_update)
+static int gc573_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_update)
 {
-	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
+//	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 	//char version[10];
 	int ret=0;
 	
@@ -395,10 +395,10 @@ static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int
     return ret;
 }
 
-static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness)
+static void gc573_brightness_read(framegrabber_handle_t handle,int *brightness)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);//
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_brightness(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_bright(board_v4l2_cxt->aver_xilinx_handle);
@@ -408,10 +408,10 @@ static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness)
 	//handle->fg_bchs_value = *brightness;
 	debug_msg("%s get brightness=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
 }
-static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast)
+static void gc573_contrast_read(framegrabber_handle_t handle,int *contrast)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_contrast(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_contrast(board_v4l2_cxt->aver_xilinx_handle);
@@ -422,10 +422,10 @@ static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast)
 	debug_msg("%s get contrast=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
 }
 
-static void cx511h_hue_read(framegrabber_handle_t handle,int *hue)
+static void gc573_hue_read(framegrabber_handle_t handle,int *hue)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_hue(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_hue(board_v4l2_cxt->aver_xilinx_handle);	
@@ -436,10 +436,10 @@ static void cx511h_hue_read(framegrabber_handle_t handle,int *hue)
 	debug_msg("%s get hue=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
 }
 
-static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation)
+static void gc573_saturation_read(framegrabber_handle_t handle,int *saturation)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_saturation(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_saturation(board_v4l2_cxt->aver_xilinx_handle);
@@ -450,10 +450,10 @@ static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation)
 	debug_msg("%s get saturation=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
 }
 
-static void cx511h_bchs_write(framegrabber_handle_t handle)
+static void gc573_bchs_write(framegrabber_handle_t handle)
 {
 //	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	int bchs_value = handle->fg_bchs_value;
 	int bchs_select = handle->fg_bchs_selection;	
@@ -472,21 +472,21 @@ static void cx511h_bchs_write(framegrabber_handle_t handle)
 	}
 }
 
-static void cx511h_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state)
+static void gc573_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 
     aver_xilinx_get_hdcp_state(board_v4l2_cxt->aver_xilinx_handle,hdcp_state);
 }
 
-static void cx511h_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state)
+static void gc573_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 
     aver_xilinx_set_hdcp_state(board_v4l2_cxt->aver_xilinx_handle, hdcp_state);
 }
 
-static int cx511h_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
+static int gc573_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
 {
     board_v4l2_context_t *board_v4l2_cxt = framegrabber_get_data(handle);
     i2c_model_handle_t i2c_mgr = board_v4l2_cxt->i2c_model_handle;
@@ -495,7 +495,7 @@ static int cx511h_i2c_read(framegrabber_handle_t handle, unsigned char channel, 
     return board_i2c_read(cxt_mgr, channel, slave, sub, data, datalen);
 }
 
-static int cx511h_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
+static int gc573_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
 {
     board_v4l2_context_t *board_v4l2_cxt = framegrabber_get_data(handle);
     i2c_model_handle_t i2c_mgr = board_v4l2_cxt->i2c_model_handle;
@@ -504,7 +504,7 @@ static int cx511h_i2c_write(framegrabber_handle_t handle, unsigned char channel,
     return board_i2c_write(cxt_mgr, channel, slave, sub, data, datalen);
 }
 
-static int cx511h_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data)
+static int gc573_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
     int ret = 0;
@@ -514,7 +514,7 @@ static int cx511h_reg_read(framegrabber_handle_t handle, unsigned int offset, un
     return ret;
 }
 
-static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data)
+static int gc573_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
     int ret = 0;
@@ -525,7 +525,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     {
         //stop task
         board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
         ite6805_power_off(ite6805_handle);
 
@@ -535,7 +535,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     {
         //start task
         board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
         ite6805_power_on(ite6805_handle);
 
@@ -548,7 +548,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     return ret;
 }
 
-static void cx511h_video_buffer_done(void *data)
+static void gc573_video_buffer_done(void *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=data;
     //mesg("%s board_v4l2_cxt %p\n",__func__,board_v4l2_cxt);
@@ -558,7 +558,7 @@ static void cx511h_video_buffer_done(void *data)
     }
 }
 
-static void cx511h_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     v4l2_model_buffer_info_t *buffer_info=cb_info->u.buffer_prepare_info.buffer_info;
@@ -592,11 +592,11 @@ static void cx511h_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
             //mesg("addr %08x size %x\n",desc[i].addr,desc[i].size);
         }
 
-        aver_xilinx_active_current_desclist(board_v4l2_cxt->aver_xilinx_handle,cx511h_video_buffer_done,board_v4l2_cxt);   
+        aver_xilinx_active_current_desclist(board_v4l2_cxt->aver_xilinx_handle,gc573_video_buffer_done,board_v4l2_cxt);
     }  
 }
 
-static void cx511h_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
 {
 //    board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     v4l2_model_buffer_info_t *buffer_info=cb_info->u.buffer_prepare_info.buffer_info;
@@ -613,10 +613,10 @@ static void cx511h_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
     }  
 }
 /*
-static void cx511h_v4l2_hardware_init(framegrabber_handle_t handle)
+static void gc573_v4l2_hardware_init(framegrabber_handle_t handle)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
     iTE6805_Hardware_Init(ite6805_handle);
 }
@@ -625,7 +625,7 @@ static void check_signal_stable_task(void *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=data;
     //ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; //check 20170511  
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0]; //check 20170511
     int width,height;
     int dual_pixel;
     int dual_pixel_set;
@@ -696,12 +696,12 @@ static void check_signal_stable_task(void *data)
     }   
 }
 
-static void cx511h_ite6805_event(void *cxt,ite6805_event_e event) 
+static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
 {
     board_v4l2_context_t *board_v4l2_cxt=cxt;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     enum ite6805_audio_sample *fe_audioinfo=&board_v4l2_cxt->cur_fe_audioinfo; 
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     ite6805_out_format_e out_format;
     unsigned int hdcp_flag;
     
@@ -833,7 +833,7 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
             break;
         }
 
-        framegrabber_handle = framegrabber_init(cxt_mgr, &cl511h_property, &cx511h_ops);
+        framegrabber_handle = framegrabber_init(cxt_mgr, &gc573_property, &gc573_ops);
         if (framegrabber_handle == NULL)
         {
             err = BOARD_V4L2_ERROR_FRAMEGRABBER_INIT;
@@ -870,9 +870,9 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
             break;
 	    }
 	    board_v4l2_cxt->i2c_model_handle = i2c_mgr;
-        for(i=0;i<CL511H_I2C_CHIP_COUNT;i++)
+        for(i=0;i<GC573_I2C_CHIP_COUNT;i++)
 	    {
-            board_v4l2_cxt->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,cl511h_chip_desc[i].name,cl511h_chip_desc[i].index);
+            board_v4l2_cxt->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,gc573_chip_desc[i].name,gc573_chip_desc[i].index);
             debug_msg("board_v4l2 i2c_chip_handle[%d] %p\n",i,board_v4l2_cxt->i2c_chip_handle[i]);
 	    }
         task_model_handle=cxt_manager_get_context(cxt_mgr,TASK_MODEL_CXT_ID,0);
@@ -894,17 +894,17 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
         
         aver_xilinx_hdmi_hotplug(board_v4l2_cxt->aver_xilinx_handle);
         
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMON ,&cx511h_v4l2_stream_on, board_v4l2_cxt);
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMOFF,&cx511h_v4l2_stream_off, board_v4l2_cxt);
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_PREPARE,&cx511h_v4l2_buffer_prepare, board_v4l2_cxt);
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_INIT,&cx511h_v4l2_buffer_init, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMON ,&gc573_v4l2_stream_on, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMOFF,&gc573_v4l2_stream_off, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_PREPARE,&gc573_v4l2_buffer_prepare, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_INIT,&gc573_v4l2_buffer_init, board_v4l2_cxt);
       
-        ite6805_register_callback(board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0],cx511h_ite6805_event,board_v4l2_cxt);
+        ite6805_register_callback(board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0],gc573_ite6805_event,board_v4l2_cxt);
         framegrabber_start(framegrabber_handle);
         cxt_manager_ref_context(aver_xilinx_handle);
         
         board_v4l2_cxt->board_id = board_id;
-        //ite6805_get_board_id(board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0],&board_v4l2_cxt->board_id); 
+        //ite6805_get_board_id(board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0],&board_v4l2_cxt->board_id);
         
     }
     while (0);
@@ -939,7 +939,7 @@ void board_v4l2_suspend(cxt_mgr_handle_t cxt_mgr)
         return;
     }
 
-    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     if (!ite6805_handle)
     {
         debug_msg("Error: cannot get ite6805_handle");
@@ -961,7 +961,7 @@ void board_v4l2_resume(cxt_mgr_handle_t cxt_mgr)
         return;
     }
 
-    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     if (!ite6805_handle)
     {
         debug_msg("Error: cannot get ite6805_handle");

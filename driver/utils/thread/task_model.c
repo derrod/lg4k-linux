@@ -14,7 +14,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/module.h>
 #include <linux/list.h>
 #include <linux/workqueue.h>
@@ -28,7 +30,7 @@ typedef struct
  {
     queue_t queue;
     const char *name;
-    task_work_func_t work_func;
+    task_worker_func_t work_func;
     void *work_cxt;
  }task_model_task_t;
     
@@ -318,7 +320,7 @@ static void task_model_tasklet_func(unsigned long data) //check
             atomic_set(&task_model_cxt->need_reschedue_DPC,1);
             #if 1 //In order to avoid video stop while aging test
             if(!queue_empty(&task_model_cxt->DPC_queue)) {
-                printk("interrupt add que Detection\n");
+                pr_info("interrupt add que Detection\n");
                 atomic_set(&task_model_cxt->need_reschedue_DPC,0);
                 tasklet_schedule(&task_model_cxt->tasklet);
             }
@@ -414,7 +416,7 @@ static task_model_task_t *task_model_new_task(task_model_cxt_t *task_model_cxt)
 
 
 
-task_handle_t task_model_create_task(task_model_handle_t task_model_handle,task_work_func_t work_func,void *work_cxt,const char *name)
+task_handle_t task_model_create_task(task_model_handle_t task_model_handle,task_worker_func_t work_func,void *work_cxt,const char *name)
 {
     task_model_task_t *task=NULL;
     

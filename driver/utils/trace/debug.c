@@ -14,7 +14,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": %s, %d: " fmt, __func__, __LINE__
+
 #include "cxt_mgr.h"
 #include "trace.h"
 #include "debug.h"
@@ -327,14 +329,24 @@ void uninit_debug()
 
 int mesg(const char *fmt,...)
 {
+    char *tmp;
     va_list args;
     int r;
-    
+
+    tmp = kmalloc(sizeof (KBUILD_MODNAME ": ") + strlen(fmt), GFP_KERNEL);
+    if ( !tmp )
+        return -1;
+
+    strcpy(tmp, KBUILD_MODNAME ": ");
+    strcat(tmp, fmt);
+
     va_start(args, fmt);
 
-    r=vprintk(fmt,args);
+    r= vprintk(tmp,args);
     va_end(args);
-    
+
+    kfree(tmp);
+
     return r;
 }
 

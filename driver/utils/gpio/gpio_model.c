@@ -9,7 +9,9 @@
  *      Version:
  * =================================================================
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/kernel.h>
 #include <linux/mutex.h>
 #include <linux/slab.h>
@@ -63,7 +65,7 @@ static void gpio_model_free_pindesc(pin_desc_t *pin_desc);
 //	struct gpio_module *this=(struct gpio_module *)module;
 //
 //	this->context=gpio_model_alloc();
-//	printk("%s context %p\n",__func__,this->context);
+//	pr_info("%s context %p\n",__func__,this->context);
 //}
 //
 //static void gpio_module_disconnect(struct sagitta_module *module, struct sagitta_dev *sdev)
@@ -205,7 +207,7 @@ static pin_desc_t *gpio_model_find_pin(gpio_ic_t *ic,const char *pin_name)
 
 //void gpio_module_init(struct sagitta_module *module)
 //{
-//	printk("%s\n",__func__);
+//	pr_info("%s\n",__func__);
 //    module->probe = gpio_module_probe;
 //	module->disconnect = gpio_module_disconnect;
 //}
