@@ -146,7 +146,7 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 		    switch(context->device_info.type)
 		    {
 		    	case DEVICE_TYPE_GRABBER:
-		    	    devicetype = VFL_TYPE_GRABBER;
+		            devicetype = VFL_TYPE_VIDEO;
 		    		break;
 		    	case DEVICE_TYPE_VBI:
 		    		devicetype = VFL_TYPE_VBI;
