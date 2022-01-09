@@ -17,10 +17,11 @@
 #include <linux/version.h>
 #include <linux/pci.h>
 #include "aver_version.h"
+#include "board.h"
 
 //#define DRIVER_VER "1.0.0026"
-int board_init(void);
-void board_exit(void);
+//int board_init(void);
+//void board_exit(void);
 static int __init aver_init(void)
 {
     int ret=0;
@@ -40,7 +41,7 @@ module_exit(aver_fini);
 MODULE_VERSION(DRIVER_VER);
 
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Driver for cx511h capture card" " v" DRIVER_VER);
+MODULE_DESCRIPTION("Driver for gc573 capture card" " v" DRIVER_VER);
 MODULE_AUTHOR("AVerMedia Tech. Inc.");
 
 

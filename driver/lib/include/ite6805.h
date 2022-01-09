@@ -578,15 +578,15 @@ typedef struct
 	iTE_u32    m_PacketVideoLock;
 	iTE_u32    m_PacketActWidth;
     iTE_u32    m_PacketActHeight;
-	iTE_u32    m_PacketVIC;
+	//iTE_u32    m_PacketVIC;
 	iTE_u32    m_PacketInputSamplingMode;				// 0: rgb, 1:422, 2:444
-	iTE_u32    m_PacketOutputSamplingMode;
+	//iTE_u32    m_PacketOutputSamplingMode;
 
 	iTE_u32    m_PacketInterlace;
 	iTE_u32    m_PacketDeepColorBits;
 	iTE_u32    m_PacketOutputColorSpace;
 	//iTE_u32    m_PacketOutputColorSpace;
-	iTE_u32    m_PacketOutputRGBQuantizationRange;
+	//iTE_u32    m_PacketOutputRGBQuantizationRange;
 	iTE_u32    m_PacketAudioSamplingFreq;
 	iTE_u32    m_oldPacketAudioSamplingFreq;
 	iTE_u32    m_PacketAudioType;
@@ -594,7 +594,7 @@ typedef struct
     iTE_u32    m_OldPacketAudioChannelCount;
 	iTE_u32    m_PacketAudioSamplingBits;
 	iTE_u32    m_PacketHDCP;
-	iTE_u32    m_PacketPCLK;
+	//iTE_u32    m_PacketPCLK;
 	iTE_u32    m_PacketFrameRate;
 	iTE_u32    m_PacketDDRMode;
 	iTE_u32    m_PacketDualPixelMode;
@@ -604,11 +604,11 @@ typedef struct
 	iTE_u32    m_InterlaceBitRetryCount;
     RXITE68051_VIDEO_POS m_VideoPos;
 
-    iTE_u8    m_VendorSpecificInfoframe[31];
+    //iTE_u8    m_VendorSpecificInfoframe[31];
 	iTE_u8    m_AVIInfoframe[AVI_INFOFRAME_SIZE];			// add by AndyNien, 20171109
 	
-    iTE_u8    m_SPDInfoframe[21];			// size ??
-    iTE_u8    m_AudioInfoframe[14];		// size 14
+    //iTE_u8    m_SPDInfoframe[21];			// size ??
+    //iTE_u8    m_AudioInfoframe[14];		// size 14
     iTE_u8    m_DRMInfoframe[DRM_HDR_METADATA_SIZE];
     iTE_u8    m_Old_DRMInfoframe[DRM_HDR_METADATA_SIZE];
 }ite6805_cxt_t;

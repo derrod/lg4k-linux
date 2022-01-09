@@ -14,7 +14,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": %s, %d: " fmt, __func__, __LINE__
+
 #include "cxt_mgr.h"
 #include "trace.h"
 #include "debug.h"
@@ -224,16 +226,23 @@ static unsigned int debug_ctl_store(void *cxt, const char *buf, unsigned int cou
                             {
                                 *end=0;
                                 end++;
-                                if(start[0])
-                                    kstrtoint(start,10,&lineno);
-                                else
-                                    lineno=1;
+                                if(start[0]) {
+                                    if (kstrtoint(start, 10, &lineno) != 0) {
+                                        lineno = 1;
+                                    }
+                                } else {
+                                    lineno = 1;
+                                }
                                 debug_ctrl.start_line=lineno;
-                                kstrtoint(end,10,&lineno);
+                                if (kstrtoint(end,10,&lineno) != 0) {
+                                    lineno = 1;
+                                }
                                 debug_ctrl.end_line=lineno;
                             }else
                             {
-                                kstrtoint(start,10,&lineno);
+                                if (kstrtoint(start,10,&lineno) != 0) {
+                                    lineno = 1;
+                                }
                                 debug_ctrl.start_line=lineno;
                                 debug_ctrl.end_line=lineno;
                             }
@@ -327,14 +336,24 @@ void uninit_debug()
 
 int mesg(const char *fmt,...)
 {
+    char *tmp;
     va_list args;
     int r;
-    
+
+    tmp = kzalloc(sizeof (KBUILD_MODNAME ": ") + strlen(fmt), GFP_ATOMIC);
+    if ( !tmp )
+        return -1;
+
+    strcpy(tmp, KBUILD_MODNAME ": ");
+    strcat(tmp, fmt);
+
     va_start(args, fmt);
 
-    r=vprintk(fmt,args);
+    r= vprintk(tmp,args);
     va_end(args);
-    
+
+    kfree(tmp);
+
     return r;
 }
 

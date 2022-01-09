@@ -9,7 +9,9 @@
  *      Version:
  * =================================================================
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/module.h>
 #include <linux/workqueue.h>
 #include <linux/kthread.h>
@@ -78,7 +80,7 @@ static int sagitta_snd_test_stream(void *this)
     int done_size;
     bool reset;
 
-    printk("%s blob_size = %d\n", __func__, blob_size);
+    pr_info("%s blob_size = %d\n", __func__, blob_size);
 
     for(;;)
     {
@@ -97,7 +99,7 @@ static int sagitta_snd_test_stream(void *this)
                 deliver_size = &_binary_audio_dump_end - audio_head;
                 reset = false;
             }
-            printk("%s deliver\n", __func__);
+            pr_info("%s deliver\n", __func__);
 #if 1
             for(i = 0; i < deliver_size; i++) {
                 if(*(audio_head + i)) {
@@ -117,7 +119,7 @@ static int sagitta_snd_test_stream(void *this)
 
     }
 stop:
-    printk("%s end\n", __func__);
+    pr_info("%s end\n", __func__);
 
     __set_current_state(TASK_RUNNING);
 
@@ -210,8 +212,6 @@ static int snd_sagitta_pcm_open(struct snd_pcm_substream *substream)
     struct sagitta_snd_dev *sdev = snd_pcm_substream_chip(substream);
     struct snd_pcm_runtime *runtime = substream->runtime;
 
-    printk("%s\n", __func__);
-
     sdev->substream = substream;
     runtime->hw = snd_sagitta_hw;
     snd_pcm_hw_constraint_integer(runtime, SNDRV_PCM_HW_PARAM_PERIODS);
@@ -225,8 +225,6 @@ static int snd_sagitta_pcm_close(struct snd_pcm_substream *substream)
 {
     struct sagitta_snd_dev *sdev = snd_pcm_substream_chip(substream);
 
-    printk("%s\n", __func__);
-
     sdev->substream = NULL;
 
 	return 0;
@@ -235,7 +233,7 @@ static int snd_sagitta_pcm_close(struct snd_pcm_substream *substream)
 static int snd_sagitta_hw_params(struct snd_pcm_substream *substream,
         struct snd_pcm_hw_params *hw_params)
 {
-	printk("%s() alloc buffer size = %u"
+	pr_info("%s() alloc buffer size = %u"
 			" periods = %u period_bytes = %u\n",
 			__func__,
 			params_buffer_bytes(hw_params),
@@ -253,7 +251,7 @@ static int snd_sagitta_hw_params(struct snd_pcm_substream *substream,
 
 static int snd_sagitta_hw_free(struct snd_pcm_substream *substream)
 {
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
 
     if(substream->runtime->dma_area)
     {
@@ -269,7 +267,7 @@ static int snd_sagitta_prepare(struct snd_pcm_substream *substream)
 {
 	struct sagitta_snd_dev *sdev = snd_pcm_substream_chip(substream);
 
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
 
     sdev->capture_transfer_done = 0;
     sdev->hwptr = 0;
@@ -285,13 +283,13 @@ static void sagitta_audio_trigger(struct work_struct *work)
     if(atomic_read(&ssdev->stream_started))
     {
 
-        printk("%s start\n", __func__);
+        pr_info("%s start\n", __func__);
 #if 0
         add_timer(&filldata_timer);
 #endif
     }
     else {
-        printk("%s stop\n", __func__);
+        pr_info("%s stop\n", __func__);
 #if 0
         del_timer_sync(&filldata_timer);
 #endif
@@ -302,8 +300,6 @@ static int snd_sagitta_card_trigger(struct snd_pcm_substream *substream,
 			int cmd)
 {
 	struct sagitta_snd_dev *sdev = snd_pcm_substream_chip(substream);
-
-    printk("%s\n", __func__);
 
     switch(cmd)
     {
@@ -355,8 +351,6 @@ static int snd_sagitta_pcm(struct sagitta_snd_dev *dev,
     struct snd_pcm *pcm;
     int err;
 
-    printk("%s\n", __func__);
-
     err = snd_pcm_new(dev->card, name, device_idx, 0, 1, &pcm);
     if(err < 0)
         return err;
@@ -377,7 +371,6 @@ static struct sagitta_snd_dev *audio_dev_register(struct sagitta_dev *sdev)
 
     int err;
 
-    printk("%s\n", __func__);
 #if 0
     snd_dev = kmalloc(sizeof(struct sagitta_snd_dev), GFP_KERNEL);
     if(!snd_dev) {
@@ -433,7 +426,7 @@ err:
 void audio_dev_deregister(struct sagitta_snd_dev *ssdev)
 {
     if(ssdev->card) {
-        printk("%s snd_card_free\n", __func__);
+        pr_info("%s snd_card_free\n", __func__);
         snd_card_free(ssdev->card);
         ssdev->card = NULL;
     }
@@ -477,7 +470,6 @@ static void alsa_disconnect(struct sagitta_module *module, struct sagitta_dev *s
     //struct sagitta_snd_dev *ssdev =   (struct sagitta_snd_dev *) sagitta_virtdev_getdata(svdev);
 	struct sagitta_snd_dev *ssdev =   (struct sagitta_snd_dev *)alsa_mod->context;
 
-    printk("%s\n", __func__);
 
     //sagitta_trace(module, "%s\n", __func__);
 
@@ -510,7 +502,7 @@ void *alsa_module_get_context(struct sagitta_dev *sdev)
 		if(strncmp(mod->name,ALSA_MODULE_ID_STR,strlen(mod->name))==0)
 		{
 			struct alsa_module *this=(struct alsa_module *)mod;
-			//printk("%s found context %p\n",__func__,this->context);
+			//pr_info("%s found context %p\n",__func__,this->context);
 			return this->context;
 		}
 	}

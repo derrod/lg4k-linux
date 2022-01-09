@@ -12,6 +12,10 @@
 #define _IT6664_CONFIG_H_
 
 
+#ifndef USING_1to8
+    #define USING_1to8 FALSE
+#endif
+
 #define IT6663_C 0x01
 
 

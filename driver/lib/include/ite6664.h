@@ -1,7 +1,6 @@
 #ifndef _ITE6664_SRC_H_
 #define _ITE6664_SRC_H_
 
-#include "version.h"
 #include "typedef.h"
 #include "cxt_mgr.h"
 #include "it6664_typedef.h"

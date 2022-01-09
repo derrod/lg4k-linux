@@ -113,7 +113,7 @@ int board_gpio_init(cxt_mgr_handle_t cxt_mgr)
 //		board_gpio_cxt->gpio_pin_handle[i]=gpio_model_request_pin_handle(gpio_mgr,pin_name[i]);
 //		if(board_gpio_cxt->gpio_pin_handle[i]==GPIO_MODEL_BAD_PIN_HANDLE)
 //		{
-//                    printk(" request %s failed\n",pin_name[i]);
+//                    pr_info(" request %s failed\n",pin_name[i]);
 //		}
 //            }
 	}

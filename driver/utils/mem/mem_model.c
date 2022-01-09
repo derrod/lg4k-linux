@@ -9,13 +9,16 @@
  *      Version:
  * =================================================================
  */
- 
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include <linux/version.h>
 #include <linux/device.h>
 #include <linux/slab.h>
 #include <linux/mempool.h>
 #include <linux/dma-mapping.h>
 #include <linux/dmapool.h>
+#include <linux/vmalloc.h>
 #include "cxt_mgr.h"
 #include "mem_model.h"
 #include "debug.h"
@@ -260,14 +263,14 @@ static mem_model_dma_buffer_t *mem_model_dma_pool_alloc_mem(mem_model_handle_t m
             if( buffer_item)
             {
                 
-                
+                 
                 dma_buffer=&buffer_item->dma_buffer;
                 //dma_buffer->phys_addr=(unsigned long int)dma_addr;
                 dma_buffer->phys_addr=dma_addr;
                 dma_buffer->vaddr=vaddr;
                 dma_buffer->size=dma_pool->cfg.size;
                 queue_add_tail(&buffer_item->queue,&dma_pool->buffer_queue);
-                debug_msg("%s dma_addr %llx dma_buffer->phys_addr %lx\n",__func__,dma_addr,dma_buffer->phys_addr);
+                pr_info("dma_addr %llx dma_buffer->phys_addr %lx dma_buffer->size %ld\n",dma_addr,dma_buffer->phys_addr, dma_buffer->size);
             }
         }   
     }
@@ -414,12 +417,20 @@ void mem_model_release_pool(mem_model_pool_handle_t pool_handle)
 
 void *mem_model_new(unsigned int  size)
 {
-    return vmalloc(size);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+    return kvzalloc(size, GFP_KERNEL);
+#else
+    return kmalloc(size, GFP_KERNEL|__GFP_NORETRY);
+#endif
 }
 
 void mem_model_delete(void *buf)
 {
-    if (buf) vfree(buf);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,12,0)
+    if (buf) kvfree(buf);
+#else
+    if (buf) kfree(buf);
+#endif
 }
 
 static void *mem_model_alloc(void)
@@ -446,7 +457,7 @@ static void mem_model_release(void *context)
                 mem_model_dma_buffer_item_t *cur_buffer,*next_buffer;
                 for_each_queue_entry_safe(cur_buffer,next_buffer,&pos->buffer_queue,queue)
                 {
-                    printk("%s %lx size %lx\n",__func__,cur_buffer->dma_buffer.phys_addr,cur_buffer->dma_buffer.size);
+                    pr_info("%s %lx size %lx\n",__func__,cur_buffer->dma_buffer.phys_addr,cur_buffer->dma_buffer.size);
                     mem_model_free_buffer_item(mem_model_cxt,cur_buffer);
                 }
             }
