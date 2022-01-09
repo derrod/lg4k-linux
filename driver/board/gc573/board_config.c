@@ -33,13 +33,13 @@ static char *no_signal_pic = NULL;
 module_param(no_signal_pic, charp, 0444);
 MODULE_PARM_DESC(no_signal_pic, "Loading this bitmap file and display it when the input is no signal");
 
-//static char *out_of_range_pic = NULL;
-//module_param(out_of_range_pic, charp, 0444);
-//MODULE_PARM_DESC(out_of_range_pic, "Loading this bitmap file and display it when the content is out of range");
+static char *out_of_range_pic = NULL;
+module_param(out_of_range_pic, charp, 0444);
+MODULE_PARM_DESC(out_of_range_pic, "Loading this bitmap file and display it when the content is out of range");
 
-static char *copy_protetion_pic = NULL;
-module_param(copy_protetion_pic, charp, 0444);
-MODULE_PARM_DESC(copy_protetion_pic, "Loading this bitmap file and display it when the content was protected");
+static char *copy_protection_pic = NULL;
+module_param(copy_protection_pic, charp, 0444);
+MODULE_PARM_DESC(copy_protection_pic, "Loading this bitmap file and display it when the content was protected");
 
 int board_init(void);
 void board_exit(void);
@@ -192,7 +192,7 @@ int board_probe(struct device *dev,unsigned long driver_info)
 	    
 	    mesg("%s subsystem_id=%x\n",__func__,subsystem_id);
 
-        pic_bmp_init(cxt_mgr, no_signal_pic, NULL, copy_protetion_pic);
+        pic_bmp_init(cxt_mgr, no_signal_pic, out_of_range_pic, copy_protection_pic);
         board_alsa_init(cxt_mgr); 
         board_v4l2_init(cxt_mgr,subsystem_id);  
         //aver_xilinx_sha204_init(aver_xilinx_handle);
