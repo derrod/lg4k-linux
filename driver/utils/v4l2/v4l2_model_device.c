@@ -9,6 +9,9 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include "v4l2_model.h"
 #include <linux/version.h>
 #include <linux/module.h>
@@ -68,34 +71,37 @@ static struct v4l2_file_operations v4l2_model_fops = {
 
 
 static struct v4l2_ioctl_ops v4l2_model_ioctl_ops = {
-	.vidioc_reqbufs             = vb2_ioctl_reqbufs,
-	.vidioc_create_bufs         = vb2_ioctl_create_bufs,
-	.vidioc_prepare_buf         = vb2_ioctl_prepare_buf,
-	.vidioc_querybuf            = vb2_ioctl_querybuf,
-	.vidioc_qbuf                = vb2_ioctl_qbuf,
-	.vidioc_dqbuf               = vb2_ioctl_dqbuf,
-	.vidioc_streamon 			= vb2_ioctl_streamon,
-	.vidioc_streamoff 			= vb2_ioctl_streamoff,
+	.vidioc_reqbufs             	= vb2_ioctl_reqbufs,
+	.vidioc_create_bufs         	= vb2_ioctl_create_bufs,
+	.vidioc_prepare_buf         	= vb2_ioctl_prepare_buf,
+	.vidioc_querybuf            	= vb2_ioctl_querybuf,
+	.vidioc_qbuf                	= vb2_ioctl_qbuf,
+	.vidioc_dqbuf               	= vb2_ioctl_dqbuf,
+	.vidioc_streamon 		= vb2_ioctl_streamon,
+	.vidioc_streamoff 		= vb2_ioctl_streamoff,
 
 	.vidioc_querycap      		= v4l2_model_ioctl_querycap,
 	.vidioc_enum_fmt_vid_cap	= v4l2_model_ioctl_enum_fmt_vid_cap,
 	.vidioc_g_fmt_vid_cap		= v4l2_model_ioctl_g_fmt_vid_cap,
-	.vidioc_try_fmt_vid_cap  	= v4l2_model_ioctl_try_fmt_vid_cap,
+//    	.vidioc_g_fmt_vid_cap_mplane	= v4l2_model_ioctl_g_fmt_vid_cap_mplane,
+    	.vidioc_try_fmt_vid_cap  	= v4l2_model_ioctl_try_fmt_vid_cap,
+//    	.vidioc_try_fmt_vid_cap_mplane  = v4l2_model_ioctl_try_fmt_vid_cap_mplane,
 	.vidioc_s_fmt_vid_cap     	= v4l2_model_ioctl_s_fmt_vid_cap,
+//    	.vidioc_s_fmt_vid_cap_mplane 	= v4l2_model_ioctl_s_fmt_vid_cap_mplane,
 	.vidioc_enum_framesizes   	= v4l2_model_ioctl_enum_framesizes,
 	.vidioc_enum_input    		= v4l2_model_ioctl_enum_input,
 	.vidioc_g_input       		= v4l2_model_ioctl_g_input,
 	.vidioc_s_input       		= v4l2_model_ioctl_s_input,
-	.vidioc_enum_frameintervals = v4l2_model_ioctl_enum_frameintervals,
+	.vidioc_enum_frameintervals 	= v4l2_model_ioctl_enum_frameintervals,
 	.vidioc_g_parm        		= v4l2_model_ioctl_g_parm,
 	.vidioc_s_parm        		= v4l2_model_ioctl_s_parm,
 	.vidioc_g_ctrl        		= v4l2_model_ioctl_g_ctrl,
 	.vidioc_s_ctrl        		= v4l2_model_ioctl_s_ctrl,
-	.vidioc_queryctrl           = v4l2_model_ioctl_queryctrl,
-	//.vidioc_g_edid				= v4l2_model_ioctl_g_edid,
-	//.vidioc_s_edid				= v4l2_model_ioctl_s_edid,
+	.vidioc_queryctrl           	= v4l2_model_ioctl_queryctrl,
+	//.vidioc_g_edid		= v4l2_model_ioctl_g_edid,
+	//.vidioc_s_edid		= v4l2_model_ioctl_s_edid,
 	
-	//.vidioc_cropcap				= v4l2_model_ioctl_cropcap,
+	//.vidioc_cropcap		= v4l2_model_ioctl_cropcap,
     //.vidioc_s_dv_timings        = v4l2_model_ioctl_s_dv_timings,
     //.vidioc_g_dv_timings        = v4l2_model_ioctl_g_dv_timings,
 #if 0
@@ -146,7 +152,7 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 		    switch(context->device_info.type)
 		    {
 		    	case DEVICE_TYPE_GRABBER:
-		    	    devicetype = VFL_TYPE_GRABBER;
+		            devicetype = VFL_TYPE_VIDEO;
 		    		break;
 		    	case DEVICE_TYPE_VBI:
 		    		devicetype = VFL_TYPE_VBI;
@@ -158,7 +164,7 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 		            devicetype = VFL_TYPE_SUBDEV;
 		    		break;
 		        default:
-		            printk("%s no supported device type 0x%x\n",__func__, context->device_info.type);
+		            pr_info("%s no supported device type 0x%x\n",__func__, context->device_info.type);
 		            break;
 		    }
 		    ret = v4l2_device_register(dev,&context->v4l2_dev);
@@ -180,7 +186,10 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 		    context->pic_bmp_handle = cxt_manager_get_context(cxt_mgr, PCI_BMP_CXT_ID, 0);
 
 		    vdev = &context->vdev;
-			vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+#if LINUX_VERSION_CODE > KERNEL_VERSION(4,18,0)
+//			vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_READWRITE;
+            vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING | V4L2_CAP_READWRITE;
+#endif
 	        vdev->release = video_device_release_empty;
 	    	vdev->v4l2_dev = &context->v4l2_dev;
 	        vdev->vfl_dir = VFL_DIR_RX;
@@ -210,10 +219,13 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 			{
 				case V4L2_MODEL_ERROR_REGISTER_VIDEO:
 					v4l2_model_vb2_release(context->vb2_context);
+					// fall through
 				case V4L2_MODEL_ERROR_VIDEO_BUF:
 					v4l2_device_unregister(&context->v4l2_dev);
+					// fall through
 				case V4L2_MODEL_ERROR_REGISTER_V4L2:
 					kfree(context);
+                    // fall through
 				case V4L2_MODEL_ERROR_ALLOC:
 				case V4L2_MODEL_ERROR_NO_DEV:
 					break;
@@ -249,7 +261,7 @@ static void v4l2_model_release(v4l2_model_handle_t context)
 	if(!v4l2m_context) {
         return;
     }
-    printk("%s\n", __func__);
+    pr_info("%s\n", __func__);
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,18,0)
     for(i=0;i<HOOK_IOCTL_TYPE_NUM;i++)
     {
@@ -403,7 +415,7 @@ static int v4l2_model_fops_open(struct file *fp)
 
     v4l2m_fh = kzalloc(sizeof (*v4l2m_fh), GFP_KERNEL);
 
-    //    printk("%s v4l2m_fh  %p\n", __func__, v4l2m_fh);
+    //    pr_info("%s v4l2m_fh  %p\n", __func__, v4l2m_fh);
 
     if (v4l2m_fh)
     {
@@ -495,59 +507,61 @@ static long v4l2_model_ioctl(struct file *file, unsigned int cmd, unsigned long 
 	}
 #endif
 
-	//printk("%s..cmd=%d\n",__func__,cmd);
+	//pr_info("%s..cmd=%d\n",__func__,cmd);
 	switch (cmd)
 	{
 		case AVER_FLASH_IOCTL_FW_DUMP:
-		    printk("AVER_FLASH_IOCTL_FW_DUMP\n");
+		    pr_info("AVER_FLASH_IOCTL_FW_DUMP\n");
 			ret = v4l2_model_ioctl_g_flash(file,(struct v4l2_dump_flash *)arg);
 			break;
 
 		case AVER_FLASH_IOCTL_FW_UPDATE:
-		    printk("----->AVER_FLASH_IOCTL_FW_UPDATE\n");
+		    pr_info("----->AVER_FLASH_IOCTL_FW_UPDATE\n");
 			ret = v4l2_model_ioctl_s_flash(file,(struct v4l2_dump_flash *)arg);
 			break;
 
 		case AVER_HDCP_IOCTL_GET_STATE:
-		    printk("AVER_HDCP_IOCTL_GET_STATE\n");
+		    pr_info("AVER_HDCP_IOCTL_GET_STATE\n");
 			ret = v4l2_model_ioctl_g_hdcp_state(file, &hdcp_state);
-			copy_to_user ((unsigned int *)arg, &hdcp_state, sizeof(hdcp_state));
+			if (copy_to_user ((unsigned int *)arg, &hdcp_state, sizeof(hdcp_state)) != 0) {
+                		pr_err("AVER_HDCP_IOCTL_GET_STATE copy_to_user() failed\n");
+            		}
 			break;
 
 		case AVER_HDCP_IOCTL_SET_STATE:
-            //printk("hdcp:%x \n", arg);
+            //pr_info("hdcp:%x \n", arg);
 			//copy_from_user (&hdcp_state,(unsigned int *) arg, sizeof(hdcp_state));
             hdcp_state = arg;
-            printk("----->AVER_HDCP_IOCTL_SET_STATE:%ld \n", arg);
+            pr_info("----->AVER_HDCP_IOCTL_SET_STATE:%ld \n", arg);
 			ret = v4l2_model_ioctl_s_hdcp_state(file,&hdcp_state);
 			break;
 
 		case AVER_GET_I2C:
-			//printk("----->AVER_GET_I2C\n");
+			//pr_info("----->AVER_GET_I2C\n");
 			ret = v4l2_model_ioctl_g_i2c(file, (struct i2c_t *) arg);
 			if (ret) {
-				printk("AVER_GET_I2C failed...\n");
+				pr_info("AVER_GET_I2C failed...\n");
 			}
 			break;
 		case AVER_SET_I2C:
-			//printk("----->AVER_SET_I2C\n");
+			//pr_info("----->AVER_SET_I2C\n");
 			ret = v4l2_model_ioctl_s_i2c(file, (struct i2c_t *) arg);
 			if (ret) {
-				printk("AVER_SET_I2C failed...\n");
+				pr_info("AVER_SET_I2C failed...\n");
 			}
 			break;
 		case AVER_GET_REG:
-			//printk("----->AVER_GET_REG\n");
+			//pr_info("----->AVER_GET_REG\n");
 			ret = v4l2_model_ioctl_g_reg(file, (struct reg_t *) arg);
 			if (ret) {
-				printk("AVER_GET_REG failed...\n");
+				pr_info("AVER_GET_REG failed...\n");
 			}
 			break;
 		case AVER_SET_REG:
-			//printk("----->AVER_SET_REG\n");
+			//pr_info("----->AVER_SET_REG\n");
 			ret = v4l2_model_ioctl_s_reg(file, (struct reg_t *) arg);
 			if (ret) {
-				printk("AVER_SET_REG failed...\n");
+				pr_info("AVER_SET_REG failed...\n");
 			}
 			break;
 
@@ -621,9 +635,9 @@ static void v4l2_model_notify(struct v4l2_subdev *sd,unsigned int notification, 
 {
 	v4l2_model_context_t *v4l2m_context=container_of(sd->v4l2_dev,v4l2_model_context_t,v4l2_dev);
 
-	printk("%s sd name %s owner %s\n",__func__,sd->name,sd->owner->name);
+	pr_info("%s sd name %s owner %s\n",__func__,sd->name,sd->owner->name);
 	framegrabber_notify(v4l2m_context->framegrabber_handle,sd->name,notification, arg);
-//	printk("%s %s notification %d \n",__func__,sd->name,notification);
+//	pr_info("%s %s notification %d \n",__func__,sd->name,notification);
 //	if(notification==2)
 //	{
 //		struct v4l2_dv_timings detected_timings;
@@ -631,8 +645,8 @@ static void v4l2_model_notify(struct v4l2_subdev *sd,unsigned int notification, 
 //		int status;
 //		v4l2_subdev_call(sd,video, query_dv_timings, &detected_timings);
 //		v4l2_subdev_call(sd,video, g_input_status, &status);
-//		printk("%s input status %x\n",__func__,status);
-//		printk("%s detected %dx%d%c\n", __func__,detected_timings.bt.width,	detected_timings.bt.height,detected_timings.bt.interlaced == V4L2_DV_INTERLACED ? 'i' : 'p');
+//		pr_info("%s input status %x\n",__func__,status);
+//		pr_info("%s detected %dx%d%c\n", __func__,detected_timings.bt.width,	detected_timings.bt.height,detected_timings.bt.interlaced == V4L2_DV_INTERLACED ? 'i' : 'p');
 //		v4l2_subdev_call(sd,video, s_dv_timings, &detected_timings);
 //
 //

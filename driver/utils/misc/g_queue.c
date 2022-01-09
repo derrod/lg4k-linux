@@ -9,9 +9,54 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
  
 #include "g_queue.h"
 #include "debug.h"
+
+void init_queue(queue_t *item)
+ {
+    item->next= item;
+    item->prev = item;
+ }
+
+int queue_empty(queue_t *head)
+{
+    return (head->next == head);
+}
+
+void __queue_add(queue_t *new,queue_t *prev,queue_t *next)
+{
+    next->prev = new;
+    new->next = next;
+    new->prev = prev;
+    prev->next= new;
+ }
+
+ void queue_add_tail(queue_t *new, queue_t *head)
+ {
+     __queue_add(new, head->prev, head);
+ } 
+
+ void __queue_del(queue_t * prev, queue_t * next)
+ {
+         next->prev = prev;
+         prev->next= next;
+ } 
+ 
+void __queue_del_entry(queue_t *entry)
+{
+        __queue_del(entry->prev, entry->next);
+}
+
+void queue_del(queue_t *entry)
+{
+        __queue_del(entry->prev, entry->next);
+        entry->next = entry;
+        entry->prev = entry;
+}
+
 
 void init_g_queue(g_queue_t *head)
 {

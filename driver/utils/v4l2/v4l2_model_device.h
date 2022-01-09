@@ -95,7 +95,7 @@ typedef struct v4l2_model_context_s
 
  
 
-#define V4L2_MODEL_DEBUG(fmt, ...) //printk(fmt, ##__VA_ARGS__)
+#define V4L2_MODEL_DEBUG(fmt, ...) //pr_info(fmt, ##__VA_ARGS__)
 
 
 #endif /* V4L2_MODEL_DEVICE_H_ */

@@ -9,7 +9,8 @@
  *      Version:
  * =================================================================
  */
- 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 //#include <linux/kernel.h>
 #include "board.h"
 #include "cxt_mgr.h"
@@ -36,7 +37,7 @@ typedef struct
         i2c_model_handle_t i2c_model_handle;
         task_model_handle_t task_model_handle;
         handle_t aver_xilinx_handle;
-        handle_t i2c_chip_handle[CL511H_I2C_CHIP_COUNT];
+        handle_t i2c_chip_handle[GC573_I2C_CHIP_COUNT];
         ite6805_frameinfo_t cur_fe_frameinfo;
         enum ite6805_audio_sample cur_fe_audioinfo;
         int cur_bchs_value;
@@ -45,9 +46,9 @@ typedef struct
         int board_id;
 }board_v4l2_context_t;
 
-static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
+static board_chip_desc_t gc573_chip_desc[GC573_I2C_CHIP_COUNT]=
 {
-        [CL511H_I2C_CHIP_ITE6805_0]=
+        [GC573_I2C_CHIP_ITE6805_0]=
         {
             .name=ITE6805_DRVNAME,
             .index=1,
@@ -55,9 +56,9 @@ static board_chip_desc_t cl511h_chip_desc[CL511H_I2C_CHIP_COUNT]=
     
 };
 
-static framegrabber_setup_input_info_t cl511h_input_info[] =
+static framegrabber_setup_input_info_t gc573_input_info[] =
 {
-    [CL511H_HDMI_INPUT] =
+    [GC573_HDMI_INPUT] =
     {
         .name = "HDMI",
         .support_framesize_info =
@@ -86,15 +87,15 @@ static framegrabber_setup_input_info_t cl511h_input_info[] =
                                     | REFRESHRATE_25_BIT | REFRESHRATE_24_BIT,                       
         },
     },
-    [CL511H_INPUT_COUNT] =
+    [GC573_INPUT_COUNT] =
     {
 		.name = NULL,
 	},
 };
 
-static framegrabber_property_t  cl511h_property={
-		.name="CL511H",
-		.input_setup_info=cl511h_input_info,
+static framegrabber_property_t  gc573_property={
+		.name="GC573",
+		.input_setup_info=gc573_input_info,
 		.support_out_pixfmt_mask=FRAMEGRABBER_PIXFMT_BITMSK,//FRAMEGRABBER_PIXFMT_YUYV_BIT ,  //tt 0615
 		//.max_supported_line_width=3840,
 		//.max_supported_line_width=4096,
@@ -105,51 +106,51 @@ static framegrabber_property_t  cl511h_property={
 static v4l2_model_device_setup_t device_info=
 {
     .type = DEVICE_TYPE_GRABBER,
-    .driver_name="CL511H",
-    .card_name="AVerMedia CL511H",
+    .driver_name="GC573",
+    .card_name="AVerMedia GC573",
     .capabilities= V4L2_MODEL_CAPS_CAPTURE_BIT | V4L2_MODEL_CAPS_READWRITE_BIT | V4L2_MODEL_CAPS_STREAMING_BIT,
     .buffer_type=V4L2_MODEL_BUF_TYPE_DMA_SG,
 };
 
 static void *board_v4l2_alloc(void);
 static void board_v4l2_release(void *cxt);
-static void cx511h_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info);
-static void cx511h_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info);
-static void cx511h_stream_on(framegrabber_handle_t handle);
-static void cx511h_stream_off(framegrabber_handle_t handle);
-//static void cx511h_bchs_read(framegrabber_handle_t handle);
-static void cx511h_bchs_write(framegrabber_handle_t handle);
-static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness);
-static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast);
-static void cx511h_hue_read(framegrabber_handle_t handle,int *hue);
-static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation);
-static void cx511h_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state);
-static void cx511h_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state);
-static int cx511h_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
-static int cx511h_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
-static int cx511h_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data);
-static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data);
+static void gc573_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info);
+static void gc573_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info);
+static void gc573_stream_on(framegrabber_handle_t handle);
+static void gc573_stream_off(framegrabber_handle_t handle);
+//static void gc573_bchs_read(framegrabber_handle_t handle);
+static void gc573_bchs_write(framegrabber_handle_t handle);
+static void gc573_brightness_read(framegrabber_handle_t handle,int *brightness);
+static void gc573_contrast_read(framegrabber_handle_t handle,int *contrast);
+static void gc573_hue_read(framegrabber_handle_t handle,int *hue);
+static void gc573_saturation_read(framegrabber_handle_t handle,int *saturation);
+static void gc573_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state);
+static void gc573_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state);
+static int gc573_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
+static int gc573_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit);
+static int gc573_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data);
+static int gc573_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data);
 
-static int cx511h_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
-static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
+static int gc573_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
+static int gc573_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump); //
 
-static framegrabber_interface_t cx511h_ops={
-    .stream_on      = cx511h_stream_on,
-    .stream_off     = cx511h_stream_off,
-    //.bchs_get     = cx511h_bchs_read,
-    .brightness_get = cx511h_brightness_read,
-    .contrast_get   = cx511h_contrast_read,
-    .hue_get        = cx511h_hue_read,
-    .saturation_get = cx511h_saturation_read,
-    .bchs_set       = cx511h_bchs_write,
-    .flash_read     = cx511h_flash_dump,
-    .flash_update   = cx511h_flash_update,
-    .hdcp_state_get = cx511h_hdcp_state_read,
-    .hdcp_state_set  = cx511h_hdcp_state_set,
-    .i2c_read = cx511h_i2c_read,
-    .i2c_write = cx511h_i2c_write,
-    .reg_read = cx511h_reg_read,
-    .reg_write = cx511h_reg_write,
+static framegrabber_interface_t gc573_ops={
+    .stream_on      = gc573_stream_on,
+    .stream_off     = gc573_stream_off,
+    //.bchs_get     = gc573_bchs_read,
+    .brightness_get = gc573_brightness_read,
+    .contrast_get   = gc573_contrast_read,
+    .hue_get        = gc573_hue_read,
+    .saturation_get = gc573_saturation_read,
+    .bchs_set       = gc573_bchs_write,
+    .flash_read     = gc573_flash_dump,
+    .flash_update   = gc573_flash_update,
+    .hdcp_state_get = gc573_hdcp_state_read,
+    .hdcp_state_set  = gc573_hdcp_state_set,
+    .i2c_read = gc573_i2c_read,
+    .i2c_write = gc573_i2c_write,
+    .reg_read = gc573_reg_read,
+    .reg_write = gc573_reg_write,
 };
 
 static void *board_v4l2_alloc()
@@ -177,7 +178,7 @@ static void board_v4l2_release(void *cxt)
 	}
 }
 
-static void cx511h_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     
@@ -185,13 +186,13 @@ static void cx511h_v4l2_stream_on(v4l2_model_callback_parameter_t *cb_info)
 
 }
 
-static void cx511h_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_stream_off(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     debug_msg("%s %p\n",__func__,board_v4l2_cxt);
     
 }
-static void cx511h_stream_on(framegrabber_handle_t handle)
+static void gc573_stream_on(framegrabber_handle_t handle)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
     aver_xilinx_video_process_cfg_t vip_cfg;
@@ -204,16 +205,15 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     framegrabber_framemode_e framemode;
     const framegrabber_pixfmt_t *pixfmt=framegrabber_g_out_pixelfmt(handle);
     
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
     //ite6805_get_hdcp_state(ite6805_handle, &hdcp_state);
     //ite6805_set_hdcp_state(ite6805_handle, hdcp_state);
 
-    enum ite6805_audio_sample fe_audioinfo=0;
+//    enum ite6805_audio_sample fe_audioinfo=0;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     
     //aver_xilinx_frame_info_t detected_frameinfo;
-    mesg("%s\n",__func__);
     //aver_xilinx_get_frameinfo(board_v4l2_cxt->aver_xilinx_handle,&detected_frameinfo);
     framemode=framegrabber_g_input_interlace(board_v4l2_cxt->fg_handle);
     framegrabber_g_input_framesize(board_v4l2_cxt->fg_handle,&width,&height);
@@ -227,15 +227,17 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     //framegrabber_s_out_framerate(board_v4l2_cxt->fg_handle,0);
     
     framegrabber_g_out_framesize(board_v4l2_cxt->fg_handle,&out_width,&out_height);
-    debug_msg("%s in %dx%d out %dx%d\n",__func__,width,height,out_width,out_height);
-    
+
     if ((out_width ==0) || (out_height ==0))
     {
-        debug_msg("debug...\n");
+        pr_info("Output framesize is not set: Setting to 1920x1080\n");
+
         out_width = 1920;
         out_height = 1080;
-        framegrabber_s_out_framesize(board_v4l2_cxt->fg_handle,1920,1080);
+        framegrabber_s_out_framesize(board_v4l2_cxt->fg_handle,out_width,out_height);
     }
+
+    pr_info("in %dx%d out %dx%d\n",width, height,out_width,out_height);
 
     if(framemode==FRAMEGRABBER_FRAMEMODE_INTERLACED)
         vip_cfg.in_videoformat.is_interlace=TRUE;
@@ -257,17 +259,17 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     
     framegrabber_s_input_audioinfo(board_v4l2_cxt->fg_handle,audio_rate);
 
-    mesg("%s...vip_cfg.audio_rate_index=%d\n",__func__,vip_cfg.audio_rate);
+    pr_info("vip_cfg.audio_rate_index=%d\n", vip_cfg.audio_rate);
     ite6805_get_frameinfo(ite6805_handle,fe_frameinfo);
     
-    debug_msg("%s========fe_frameinfo->packet_colorspace=%d\n",__func__,fe_frameinfo->packet_colorspace);
+    pr_info("fe_frameinfo->packet_colorspace=%d\n", fe_frameinfo->packet_colorspace);
     
     vip_cfg.in_videoformat.fps = framegrabber_g_input_framerate(board_v4l2_cxt->fg_handle);
     //if(vip_cfg.is_interlace==TRUE)
         //vip_cfg.in_framerate = vip_cfg.in_framerate * 2;
     vip_cfg.packet_colorspace = fe_frameinfo->packet_colorspace;    
-    vip_cfg.in_videoformat.vactive = width;
-    vip_cfg.in_videoformat.hactive = height;
+    vip_cfg.in_videoformat.vactive = height;
+    vip_cfg.in_videoformat.hactive = width;
     //if (vip_cfg.in_videoformat.is_interlace==TRUE)
         //vip_cfg.in_videoformat.hactive *= 2; 
     vip_cfg.out_videoformat.width=out_width;
@@ -283,7 +285,7 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     vip_cfg.in_ddrmode = fe_frameinfo->ddr_mode;
     //vip_cfg.out_framerate= 0; //for test
     vip_cfg.out_videoformat.fps=frameinterval;
-    mesg("%s..in_framerate=%d  out_framerate=%d pixel_clock=%d\n",__func__,vip_cfg.in_videoformat.fps,vip_cfg.out_videoformat.fps,vip_cfg.pixel_clock);
+    pr_info("in_framerate=%d  out_framerate=%d, pixel_clock=%d, in_ddrmode=%d\n",vip_cfg.in_videoformat.fps,vip_cfg.out_videoformat.fps,vip_cfg.pixel_clock, vip_cfg.in_ddrmode);
 
     ite6805_get_workingmode(ite6805_handle, &(vip_cfg.in_workingmode)) ;
     vip_cfg.in_colorspacemode = 0; // 0-yuv, 1-rgb limit, 2-rgb full
@@ -291,67 +293,86 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     vip_cfg.in_videoformat.colorspace = VIDEO_RGB_MODE;
     vip_cfg.in_packetsamplingmode = 1; // 0-rgb, 1-422, 2-444	
     vip_cfg.in_packetcsc_bt = COLORMETRY_ITU709;
+
     ite6805_get_sampingmode(ite6805_handle, &(vip_cfg.in_packetsamplingmode));
     vip_cfg.currentCSC = CAPTURE_BT709_COMPUTER;
-	
+
+    pr_info("in_colorspacemode = %d, in_packetsamplingmode = %d, in_videoformat_colorspace = %d\n", vip_cfg.in_colorspacemode , (int) vip_cfg.in_videoformat.colorspace, vip_cfg.in_packetsamplingmode);
+
     //enable video bypass
-    if (((vip_cfg.in_videoformat.vactive == 4096) && (vip_cfg.out_videoformat.width == 4096)
-       && (vip_cfg.out_videoformat.height == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //4096x2160
-       ((vip_cfg.in_videoformat.vactive == 3840) && (vip_cfg.out_videoformat.width == 3840)
-       && (vip_cfg.out_videoformat.height == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //3840x2160
-       ((vip_cfg.in_videoformat.vactive == 2560) && (vip_cfg.out_videoformat.width == 2560)  
-       && (vip_cfg.in_videoformat.hactive == 1600) && (vip_cfg.out_videoformat.height == 1600)) || //2560x1600
-       ((vip_cfg.in_videoformat.vactive == 2560) && (vip_cfg.out_videoformat.width == 2560) 
-       && (vip_cfg.in_videoformat.hactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //2560x1440
-       ((vip_cfg.in_videoformat.vactive == 2560) && (vip_cfg.out_videoformat.width == 2560) 
-       && (vip_cfg.in_videoformat.hactive == 1080) && (vip_cfg.out_videoformat.height == 1080)) ||  //2560x1080
-       ((vip_cfg.in_videoformat.vactive == 1920) && (vip_cfg.out_videoformat.width == 1920) 
-       && (vip_cfg.in_videoformat.hactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //1920x1440
-       ((vip_cfg.in_videoformat.vactive == 1856) && (vip_cfg.out_videoformat.width == 1856)
-       && (vip_cfg.in_videoformat.hactive == 1392) && (vip_cfg.out_videoformat.height == 1392)) || //1856x1392
-       ((vip_cfg.in_videoformat.vactive == 1792) && (vip_cfg.out_videoformat.width == 1792)
-       && (vip_cfg.in_videoformat.hactive == 1344) && (vip_cfg.out_videoformat.height == 1344)) || //1792x1344
-       ((vip_cfg.in_videoformat.vactive == 2048) && (vip_cfg.out_videoformat.width == 2048)
-       && (vip_cfg.in_videoformat.hactive == 1152) && (vip_cfg.out_videoformat.height == 1152)) || //2048x1152
-       ((vip_cfg.in_videoformat.vactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
-       && (vip_cfg.in_videoformat.hactive == 1200) && (vip_cfg.out_videoformat.height == 1200)) || //1920x1200
-       ((vip_cfg.in_videoformat.vactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
-       && (vip_cfg.in_videoformat.hactive == 1080) && (vip_cfg.out_videoformat.height == 1080)
+    if (((vip_cfg.in_videoformat.hactive == 4096) && (vip_cfg.out_videoformat.width == 4096)
+       && (vip_cfg.in_videoformat.vactive == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //4096x2160
+       ((vip_cfg.in_videoformat.hactive == 3840) && (vip_cfg.out_videoformat.width == 3840)
+       && (vip_cfg.in_videoformat.vactive == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //3840x2160
+       ((vip_cfg.in_videoformat.hactive == 2560) && (vip_cfg.out_videoformat.width == 2560)
+       && (vip_cfg.in_videoformat.vactive == 1600) && (vip_cfg.out_videoformat.height == 1600)) || //2560x1600
+       ((vip_cfg.in_videoformat.hactive == 2560) && (vip_cfg.out_videoformat.width == 2560)
+       && (vip_cfg.in_videoformat.vactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //2560x1440
+       ((vip_cfg.in_videoformat.hactive == 2560) && (vip_cfg.out_videoformat.width == 2560)
+       && (vip_cfg.in_videoformat.vactive == 1080) && (vip_cfg.out_videoformat.height == 1080)) ||  //2560x1080
+       ((vip_cfg.in_videoformat.hactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
+       && (vip_cfg.in_videoformat.vactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //1920x1440
+       ((vip_cfg.in_videoformat.hactive == 1856) && (vip_cfg.out_videoformat.width == 1856)
+       && (vip_cfg.in_videoformat.vactive == 1392) && (vip_cfg.out_videoformat.height == 1392)) || //1856x1392
+       ((vip_cfg.in_videoformat.hactive == 1792) && (vip_cfg.out_videoformat.width == 1792)
+       && (vip_cfg.in_videoformat.vactive == 1344) && (vip_cfg.out_videoformat.height == 1344)) || //1792x1344
+       ((vip_cfg.in_videoformat.hactive == 2048) && (vip_cfg.out_videoformat.width == 2048)
+       && (vip_cfg.in_videoformat.vactive == 1152) && (vip_cfg.out_videoformat.height == 1152)) || //2048x1152
+       ((vip_cfg.in_videoformat.hactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
+       && (vip_cfg.in_videoformat.vactive == 1200) && (vip_cfg.out_videoformat.height == 1200)) || //1920x1200
+       ((vip_cfg.in_videoformat.hactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
+       && (vip_cfg.in_videoformat.vactive == 1080) && (vip_cfg.out_videoformat.height == 1080)
        && (vip_cfg.in_videoformat.fps == 120)))
     {
-		mesg("%s bypass = 1.. in %dx%d out %dx%d\n",__func__,vip_cfg.in_videoformat.vactive, vip_cfg.in_videoformat.hactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
+		pr_info("bypass = 1.. in %dx%d out %dx%d\n",vip_cfg.in_videoformat.hactive, vip_cfg.in_videoformat.vactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
         //aver_xilinx_video_bypass(board_v4l2_cxt->aver_xilinx_handle,1); //enable video bypass
         vip_cfg.video_bypass = 1;
 	}
 	else
 	{
-		mesg("%s bypass = 0.. in %dx%d out %dx%d\n",__func__,vip_cfg.in_videoformat.vactive,vip_cfg.in_videoformat.hactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
+		pr_info("bypass = 0.. in %dx%d out %dx%d\n",vip_cfg.in_videoformat.hactive,vip_cfg.in_videoformat.vactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
 		//aver_xilinx_video_bypass(board_v4l2_cxt->aver_xilinx_handle,0); //disable video bypass
 		vip_cfg.video_bypass = 0;
 	}
 	
     switch(pixfmt->pixfmt_out)
     {
-        case AVER_XILINX_FMT_YUYV:
-        case AVER_XILINX_FMT_UYVY:
-        case AVER_XILINX_FMT_YVYU:
-        case AVER_XILINX_FMT_VYUY:
+        case YUYV:
+        case YVYU:
+        case VYUY:
             vip_cfg.pixel_format=AVER_XILINX_FMT_YUYV;
-            mesg("%s...vip_cfg.pixel_format_output=AVER_XILINX_FMT_YUYV\n",__func__);
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_YUYV\n");
             break;
-        case AVER_XILINX_FMT_RGBP: //RGB565
-        case AVER_XILINX_FMT_RGBR: //RGB565X
-        case AVER_XILINX_FMT_RGBO:
-        case AVER_XILINX_FMT_RGBQ:
-        case AVER_XILINX_FMT_RGB3: //RGB24 4:4:4
-        case AVER_XILINX_FMT_BGR3: 
-        case AVER_XILINX_FMT_RGB4:
-        case AVER_XILINX_FMT_BGR4:
-            vip_cfg.pixel_format=AVER_XILINX_FMT_RGB3;
-            mesg("%s...vip_cfg.pixel_format=AVER_XILINX_FMT_RGB3\n",__func__);
+        case UYVY:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_UYVY;
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_UYVY\n");
+            break;
+        case YVU420:
+        case YVU420M: //YV12
+            vip_cfg.pixel_format=AVER_XILINX_FMT_YVU420;
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_YVU420\n");
+            break;
+        case NV12:
+        case NV12M:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_NV12;
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_NV12\n");
+            break;
+        case RGBP: //RGB565
+        case RGBR: //RGB565X
+        case RGBO:
+        case RGBQ:
+        case RGB3: //RGB24 4:4:4
+        case BGR3:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_BGR3;
+            pr_info("vip_cfg.pixel_format=AVER_XILINX_FMT_BGR3\n");
+            break;
+        case AR24: //fall through
+        case BA24:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_RGB4;
+            pr_info("vip_cfg.pixel_format=AVER_XILINX_FMT_RGB4\n");
             break;
         default:
-            vip_cfg.pixel_format=AVER_XILINX_CS_YUV422;
+            vip_cfg.pixel_format=AVER_XILINX_FMT_YUYV;
             break;
     }       
     aver_xilinx_config_video_process(board_v4l2_cxt->aver_xilinx_handle,&vip_cfg);
@@ -362,10 +383,10 @@ static void cx511h_stream_on(framegrabber_handle_t handle)
     //ite6805_set_freerun_screen(ite6805_handle,FALSE);    
 }
 
-static void cx511h_stream_off(framegrabber_handle_t handle)
+static void gc573_stream_off(framegrabber_handle_t handle)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 	
 	//debug_msg(">>>>>>>>>>>%s...\n",__func__);
 	//ite6805_set_freerun_screen(ite6805_handle,TRUE);
@@ -373,9 +394,9 @@ static void cx511h_stream_off(framegrabber_handle_t handle)
     aver_xilinx_enable_video_streaming(board_v4l2_cxt->aver_xilinx_handle,FALSE);
 }
 
-static int cx511h_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump) //
+static int gc573_flash_dump(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_dump) //
 {
-	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
+//	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 	//char version[10];
 	int ret=0;
 		
@@ -384,9 +405,9 @@ static int cx511h_flash_dump(framegrabber_handle_t handle,int start_block, int b
     return ret;
 }
 
-static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_update)
+static int gc573_flash_update(framegrabber_handle_t handle,int start_block, int blocks, U8_T *flash_update)
 {
-	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
+//	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 	//char version[10];
 	int ret=0;
 	
@@ -395,10 +416,10 @@ static int cx511h_flash_update(framegrabber_handle_t handle,int start_block, int
     return ret;
 }
 
-static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness)
+static void gc573_brightness_read(framegrabber_handle_t handle,int *brightness)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);//
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_brightness(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_bright(board_v4l2_cxt->aver_xilinx_handle);
@@ -406,12 +427,12 @@ static void cx511h_brightness_read(framegrabber_handle_t handle,int *brightness)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*brightness = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *brightness;
-	debug_msg("%s get brightness=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("brightness=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
-static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast)
+static void gc573_contrast_read(framegrabber_handle_t handle,int *contrast)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_contrast(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_contrast(board_v4l2_cxt->aver_xilinx_handle);
@@ -419,13 +440,13 @@ static void cx511h_contrast_read(framegrabber_handle_t handle,int *contrast)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*contrast = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *contrast;
-	debug_msg("%s get contrast=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("contrast=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 
-static void cx511h_hue_read(framegrabber_handle_t handle,int *hue)
+static void gc573_hue_read(framegrabber_handle_t handle,int *hue)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_hue(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_hue(board_v4l2_cxt->aver_xilinx_handle);	
@@ -433,13 +454,13 @@ static void cx511h_hue_read(framegrabber_handle_t handle,int *hue)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*hue = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *hue;
-	debug_msg("%s get hue=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("hue=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 
-static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation)
+static void gc573_saturation_read(framegrabber_handle_t handle,int *saturation)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	//ite6805_get_saturation(ite6805_handle,&board_v4l2_cxt->cur_bchs_value); 
     //board_v4l2_cxt->cur_bchs_value = aver_xilinx_get_saturation(board_v4l2_cxt->aver_xilinx_handle);
@@ -447,13 +468,13 @@ static void cx511h_saturation_read(framegrabber_handle_t handle,int *saturation)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*saturation = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *saturation;
-	debug_msg("%s get saturation=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("saturation=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 
-static void cx511h_bchs_write(framegrabber_handle_t handle)
+static void gc573_bchs_write(framegrabber_handle_t handle)
 {
 //	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+	//handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
    
 	int bchs_value = handle->fg_bchs_value;
 	int bchs_select = handle->fg_bchs_selection;	
@@ -465,28 +486,28 @@ static void cx511h_bchs_write(framegrabber_handle_t handle)
 		//framegrabber_s_input_bchs(board_v4l2_cxt->fg_handle,board_v4l2_cxt->cur_bchs_value,board_v4l2_cxt->cur_bchs_selection);
 		//ite6805_set_bchs(ite6805_handle,&bchs_value,&bchs_select); 
         //aver_xilinx_set_bchs(board_v4l2_cxt->aver_xilinx_handle,bchs_value,bchs_select); 
-		if (bchs_select ==0) debug_msg("set brightness=%d\n",bchs_value);
-		if (bchs_select ==1) debug_msg("set contrast=%d\n",bchs_value);
-		if (bchs_select ==2) debug_msg("set hue=%d\n",bchs_value);
-		if (bchs_select ==3) debug_msg("set saturation=%d\n",bchs_value);
+		if (bchs_select ==0) pr_info("set brightness=%d\n",bchs_value);
+		if (bchs_select ==1) pr_info("set contrast=%d\n",bchs_value);
+		if (bchs_select ==2) pr_info("set hue=%d\n",bchs_value);
+		if (bchs_select ==3) pr_info("set saturation=%d\n",bchs_value);
 	}
 }
 
-static void cx511h_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state)
+static void gc573_hdcp_state_read(framegrabber_handle_t handle,int *hdcp_state)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 
     aver_xilinx_get_hdcp_state(board_v4l2_cxt->aver_xilinx_handle,hdcp_state);
 }
 
-static void cx511h_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state)
+static void gc573_hdcp_state_set(framegrabber_handle_t handle,int hdcp_state)
 {
 	board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
 
     aver_xilinx_set_hdcp_state(board_v4l2_cxt->aver_xilinx_handle, hdcp_state);
 }
 
-static int cx511h_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
+static int gc573_i2c_read(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
 {
     board_v4l2_context_t *board_v4l2_cxt = framegrabber_get_data(handle);
     i2c_model_handle_t i2c_mgr = board_v4l2_cxt->i2c_model_handle;
@@ -495,7 +516,7 @@ static int cx511h_i2c_read(framegrabber_handle_t handle, unsigned char channel, 
     return board_i2c_read(cxt_mgr, channel, slave, sub, data, datalen);
 }
 
-static int cx511h_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
+static int gc573_i2c_write(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
 {
     board_v4l2_context_t *board_v4l2_cxt = framegrabber_get_data(handle);
     i2c_model_handle_t i2c_mgr = board_v4l2_cxt->i2c_model_handle;
@@ -504,7 +525,7 @@ static int cx511h_i2c_write(framegrabber_handle_t handle, unsigned char channel,
     return board_i2c_write(cxt_mgr, channel, slave, sub, data, datalen);
 }
 
-static int cx511h_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data)
+static int gc573_reg_read(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
     int ret = 0;
@@ -514,7 +535,7 @@ static int cx511h_reg_read(framegrabber_handle_t handle, unsigned int offset, un
     return ret;
 }
 
-static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data)
+static int gc573_reg_write(framegrabber_handle_t handle, unsigned int offset, unsigned char n_bytes, unsigned int data)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
     int ret = 0;
@@ -525,7 +546,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     {
         //stop task
         board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
         ite6805_power_off(ite6805_handle);
 
@@ -535,7 +556,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     {
         //start task
         board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+        handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
         ite6805_power_on(ite6805_handle);
 
@@ -548,7 +569,7 @@ static int cx511h_reg_write(framegrabber_handle_t handle, unsigned int offset, u
     return ret;
 }
 
-static void cx511h_video_buffer_done(void *data)
+static void gc573_video_buffer_done(void *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=data;
     //mesg("%s board_v4l2_cxt %p\n",__func__,board_v4l2_cxt);
@@ -558,45 +579,53 @@ static void cx511h_video_buffer_done(void *data)
     }
 }
 
-static void cx511h_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     v4l2_model_buffer_info_t *buffer_info=cb_info->u.buffer_prepare_info.buffer_info;
-    //mesg("%s %p buffer_info %p\n",__func__,board_v4l2_cxt,buffer_info);
+    pr_debug("context %p buffer_info %p\n",board_v4l2_cxt,buffer_info);
     if(buffer_info)
     {
-        int i;
+        int i, j;
         v4l2_model_buf_desc_t *desc;
-        unsigned framebufsize,remain;
-        int width,height;
-        unsigned bytesperline;
-        
-        framegrabber_g_out_framesize(board_v4l2_cxt->fg_handle,&width,&height);
-        bytesperline=framegrabber_g_out_bytesperline(board_v4l2_cxt->fg_handle);
-        framebufsize=bytesperline*height; 
-        //debug_msg("%s %dx%d framesize %u\n",__func__,width,height,framebufsize);
-      //  mesg("buf type %d count %d\n",buffer_info->buf_type,buffer_info->buf_count[0]);
-        for(i=0,desc=buffer_info->buf_info[0],remain=framebufsize;i<buffer_info->buf_count[0];i++)
-        {
-            if(remain >= desc[i].size)
-            {
-                aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle,desc[i].addr,desc[i].size);
-                remain -= desc[i].size;
-            }else
-            {
-                aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle,desc[i].addr,remain);
-                remain =0;
-                break;
+        unsigned remain;
+        unsigned sizes[3];
+        unsigned plane_sizes[3];
+
+        sizes[2] = framegrabber_g_out_planarbuffersize(board_v4l2_cxt->fg_handle, 3);
+        sizes[1] = framegrabber_g_out_planarbuffersize(board_v4l2_cxt->fg_handle, 2);
+        sizes[0] = framegrabber_g_out_planarbuffersize(board_v4l2_cxt->fg_handle, 1);
+
+
+//        debug_msg("%s %dx%d framesize %u\n",__func__,width,height,framebufsize);
+
+        for(j=0; j < buffer_info->planes; j ++) {
+            pr_debug("plane %d buf_type %d count %d\n", j, buffer_info->buf_type, buffer_info->buf_count[j]);
+            for (i = 0, desc = buffer_info->buf_info[j], remain = sizes[j]; i < buffer_info->buf_count[j]; i++) {
+                if (remain >= desc[i].size) {
+                    aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle, desc[i].addr, desc[i].size);
+                    remain -= desc[i].size;
+                } else {
+                    aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle, desc[i].addr, remain);
+                    remain = 0;
+                    break;
+                }
+
+                pr_debug("addr %08lx size %lx\n", desc[i].addr, desc[i].size);
             }
-                
-            //mesg("addr %08x size %x\n",desc[i].addr,desc[i].size);
         }
 
-        aver_xilinx_active_current_desclist(board_v4l2_cxt->aver_xilinx_handle,cx511h_video_buffer_done,board_v4l2_cxt);   
+        plane_sizes[2] = framegrabber_g_out_planesize(board_v4l2_cxt->fg_handle, 3);
+        plane_sizes[1] = framegrabber_g_out_planesize(board_v4l2_cxt->fg_handle, 2);
+        plane_sizes[0] = framegrabber_g_out_planesize(board_v4l2_cxt->fg_handle, 1);
+
+        aver_xilinx_translate_desclist(board_v4l2_cxt->aver_xilinx_handle, plane_sizes[0], plane_sizes[1], plane_sizes[2]);
+
+        aver_xilinx_active_current_desclist(board_v4l2_cxt->aver_xilinx_handle,gc573_video_buffer_done,board_v4l2_cxt);
     }  
 }
 
-static void cx511h_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
+static void gc573_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
 {
 //    board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     v4l2_model_buffer_info_t *buffer_info=cb_info->u.buffer_prepare_info.buffer_info;
@@ -608,15 +637,15 @@ static void cx511h_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
         //mesg("buf type %d count %d\n",buffer_info->buf_type,buffer_info->buf_count[0]);
         for(i=0,desc=buffer_info->buf_info[0];i<buffer_info->buf_count[0];i++)
         {
-            //mesg("addr %08x size %x\n",desc[i].addr,desc[i].size);
+            pr_info("addr %08lx size %lx\n",desc[i].addr,desc[i].size);
         } 
     }  
 }
 /*
-static void cx511h_v4l2_hardware_init(framegrabber_handle_t handle)
+static void gc573_v4l2_hardware_init(framegrabber_handle_t handle)
 {
     board_v4l2_context_t *board_v4l2_cxt=framegrabber_get_data(handle);
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
 
     iTE6805_Hardware_Init(ite6805_handle);
 }
@@ -625,7 +654,7 @@ static void check_signal_stable_task(void *data)
 {
     board_v4l2_context_t *board_v4l2_cxt=data;
     //ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
-    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; //check 20170511  
+    //handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0]; //check 20170511
     int width,height;
     int dual_pixel;
     int dual_pixel_set;
@@ -633,9 +662,7 @@ static void check_signal_stable_task(void *data)
     aver_xilinx_frame_info_t detected_frameinfo;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     BOOL_T is_interlace;
-    
-    debug_msg("%s\n",__func__);
-    
+
     //ite6805_get_frameinfo(ite6805_handle,fe_frameinfo);
     //debug_msg("%s ite6805 detected size %dx%d;framerate %d \n",__func__,fe_frameinfo->width,fe_frameinfo->height,fe_frameinfo->framerate);
         
@@ -650,8 +677,8 @@ static void check_signal_stable_task(void *data)
     else
         dual_pixel_set = detected_frameinfo.width; 
     
-    debug_msg("%s framegrabber size %dx%d\n",__func__,width,height);
-    debug_msg("%s fpga detected size %dx%d\n",__func__,detected_frameinfo.width,detected_frameinfo.height);
+    pr_info("framegrabber size %dx%d%c\n",width,height,(fe_frameinfo->is_interlace) ?'i':'p');
+    pr_info("fpga detected size %dx%d%c\n",detected_frameinfo.width,detected_frameinfo.height,(detected_frameinfo.is_interlace) ?'i':'p');
     if((((detected_frameinfo.width<320 || detected_frameinfo.height<240)) || (width !=/*detected_frameinfo.width*/dual_pixel_set)|| (height !=detected_frameinfo.height)) && (cnt_retry<3))
     {
 		cnt_retry++;
@@ -659,9 +686,7 @@ static void check_signal_stable_task(void *data)
         task_model_run_task_after(board_v4l2_cxt->task_model_handle,board_v4l2_cxt->check_signal_task_handle,100000);
         return;
     }
-    
-    //debug_msg("%s fpga detected size %dx%d\n",__func__,detected_frameinfo.width,detected_frameinfo.height);
-   
+
     if (fe_frameinfo->is_interlace)
     {
 		detected_frameinfo.width = fe_frameinfo->width;
@@ -696,12 +721,12 @@ static void check_signal_stable_task(void *data)
     }   
 }
 
-static void cx511h_ite6805_event(void *cxt,ite6805_event_e event) 
+static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
 {
     board_v4l2_context_t *board_v4l2_cxt=cxt;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     enum ite6805_audio_sample *fe_audioinfo=&board_v4l2_cxt->cur_fe_audioinfo; 
-    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0]; 
+    handle_t ite6805_handle=board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     ite6805_out_format_e out_format;
     unsigned int hdcp_flag;
     
@@ -711,8 +736,8 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
     {
     case ITE6805_LOCK:
     {
-        //debug_msg("ITE6805_LOCK\n");
-        //aver_xilinx_get_frameinfo(aver_xilinx_handle,&detected_frameinfo,fe_frameinfo->pixel_clock); 
+        pr_info("ITE6805_LOCK\n");
+//        aver_xilinx_get_frameinfo(board_v4l2_cxt->aver_xilinx_handle,&detected_frameinfo,fe_frameinfo->pixel_clock);
         
         {
             //aver_xilinx_color_adjust_control(board_v4l2_cxt->aver_xilinx_handle);
@@ -720,8 +745,8 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
             
 //            aver_xilinx_hdmi_hotplug(board_v4l2_cxt->aver_xilinx_handle);
         
-            mesg("%s locked fe %dx%d%c\n",__func__,fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace)?'i':'p'/*,fe_frameinfo->framerate*/);
-            //debug_msg("pixclock %d colorspace %d\n",fe_frameinfo->pixel_clock,fe_frameinfo->colorspace);
+            pr_info("locked fe %dx%d%c %dHz %d\n",fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace)?'i':'p', fe_frameinfo->framerate, fe_frameinfo->denominator);
+            pr_info("pixclock %d\n",fe_frameinfo->pixel_clock);
    
 //work around for ITE6805 detect issue      
             if ((fe_frameinfo->is_interlace==0) && ((fe_frameinfo->height == 240) || (fe_frameinfo->height == 288)))
@@ -735,8 +760,15 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
             {
                 //debug_msg("ITE6805 framerate adapter\n");	
                 fe_frameinfo->framerate /= 2;
-            } 
+            }
+
             ite6805_get_hdcp_level(ite6805_handle, &hdcp_flag);
+
+            U8_T state;
+            if (gc573_i2c_read(board_v4l2_cxt->fg_handle, 0, 0x70, 0xd0, 1, &state, 1, 0) == 0){
+                hdcp_flag = hdcp_flag | (state&1);
+            }
+
             *fe_audioinfo = aver_xilinx_get_audioinfo(board_v4l2_cxt->aver_xilinx_handle);		
             framegrabber_s_input_audioinfo(board_v4l2_cxt->fg_handle,*fe_audioinfo);
 			 
@@ -747,7 +779,7 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
             framegrabber_s_input_framesize(board_v4l2_cxt->fg_handle,fe_frameinfo->width,fe_frameinfo->height); //tt 0602
             
             framegrabber_s_input_dualmode(board_v4l2_cxt->fg_handle,fe_frameinfo->dual_pixel); //tt 1003
-            
+
             framegrabber_s_hdcp_flag(board_v4l2_cxt->fg_handle,hdcp_flag);
             
             //aver_xilinx_dual_pixel(board_v4l2_cxt->aver_xilinx_handle,fe_frameinfo->dual_pixel);
@@ -768,10 +800,10 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
                 ite6805_set_out_format(ite6805_handle,out_format);
                 //ite6805_set_out_format(board_v4l2_cxt->i2c_chip_handle[CX511H_I2C_CHIP_ITE6805_1],ITE6805_OUT_FORMAT_SDR_ITU656_24_MODE0);
             }
-            //debug_msg("=========== ite6805_set_out_format=%02x\n",out_format);
+            pr_info("ite6805_set_out_format=%02x\n",out_format);
         }
         //sys_msleep(100);
-        //debug_msg("pixelclock %d detected %dx%d%c\n",fe_frameinfo->pixel_clock,detected_frameinfo.width,detected_frameinfo.height,(detected_frameinfo.is_interlace) ?'i':'p');
+        pr_info("pixelclock %d detected %dx%d%c\n",fe_frameinfo->pixel_clock,fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace) ?'i':'p');
         framegrabber_s_input_status(board_v4l2_cxt->fg_handle,FRAMEGRABBER_INPUT_STATUS_OK);
         framegrabber_mask_s_status(board_v4l2_cxt->fg_handle,FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT,FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT);
 
@@ -779,7 +811,7 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
     }
         break;
     case ITE6805_UNLOCK:
-        //debug_msg("ITE6805_UNLOCK\n");
+        pr_info("ITE6805_UNLOCK\n");
         framegrabber_s_hdcp_flag(board_v4l2_cxt->fg_handle,0);
         framegrabber_s_input_framesize(board_v4l2_cxt->fg_handle,0,0); //tt 0615
         framegrabber_mask_s_status(board_v4l2_cxt->fg_handle,FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT,0);
@@ -787,7 +819,7 @@ static void cx511h_ite6805_event(void *cxt,ite6805_event_e event)
         break;
         
     case ITE6805_HDCP:
-        //debug_msg("ITE6805_HDCP\n");
+        pr_info("ITE6805_HDCP\n");
         ite6805_get_hdcp_level(ite6805_handle, &hdcp_flag);
 		framegrabber_s_hdcp_flag(board_v4l2_cxt->fg_handle,hdcp_flag);
 		break;    
@@ -833,7 +865,7 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
             break;
         }
 
-        framegrabber_handle = framegrabber_init(cxt_mgr, &cl511h_property, &cx511h_ops);
+        framegrabber_handle = framegrabber_init(cxt_mgr, &gc573_property, &gc573_ops);
         if (framegrabber_handle == NULL)
         {
             err = BOARD_V4L2_ERROR_FRAMEGRABBER_INIT;
@@ -870,9 +902,9 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
             break;
 	    }
 	    board_v4l2_cxt->i2c_model_handle = i2c_mgr;
-        for(i=0;i<CL511H_I2C_CHIP_COUNT;i++)
+        for(i=0;i<GC573_I2C_CHIP_COUNT;i++)
 	    {
-            board_v4l2_cxt->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,cl511h_chip_desc[i].name,cl511h_chip_desc[i].index);
+            board_v4l2_cxt->i2c_chip_handle[i]=i2c_model_get_nth_driver_handle(i2c_mgr,gc573_chip_desc[i].name,gc573_chip_desc[i].index);
             debug_msg("board_v4l2 i2c_chip_handle[%d] %p\n",i,board_v4l2_cxt->i2c_chip_handle[i]);
 	    }
         task_model_handle=cxt_manager_get_context(cxt_mgr,TASK_MODEL_CXT_ID,0);
@@ -894,17 +926,17 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
         
         aver_xilinx_hdmi_hotplug(board_v4l2_cxt->aver_xilinx_handle);
         
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMON ,&cx511h_v4l2_stream_on, board_v4l2_cxt);
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMOFF,&cx511h_v4l2_stream_off, board_v4l2_cxt);
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_PREPARE,&cx511h_v4l2_buffer_prepare, board_v4l2_cxt);
-        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_INIT,&cx511h_v4l2_buffer_init, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMON ,&gc573_v4l2_stream_on, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_STREAMOFF,&gc573_v4l2_stream_off, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_PREPARE,&gc573_v4l2_buffer_prepare, board_v4l2_cxt);
+        v4l2_model_register_callback(v4l2_handle,V4L2_MODEL_CALLBACK_BUFFER_INIT,&gc573_v4l2_buffer_init, board_v4l2_cxt);
       
-        ite6805_register_callback(board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0],cx511h_ite6805_event,board_v4l2_cxt);
+        ite6805_register_callback(board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0],gc573_ite6805_event,board_v4l2_cxt);
         framegrabber_start(framegrabber_handle);
         cxt_manager_ref_context(aver_xilinx_handle);
         
         board_v4l2_cxt->board_id = board_id;
-        //ite6805_get_board_id(board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0],&board_v4l2_cxt->board_id); 
+        //ite6805_get_board_id(board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0],&board_v4l2_cxt->board_id);
         
     }
     while (0);
@@ -923,7 +955,7 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
         default:
             break;
         }
-        debug_msg("%s err %d\n", __func__, err);
+        pr_err("err %d\n", err);
     }
 }
 
@@ -939,7 +971,7 @@ void board_v4l2_suspend(cxt_mgr_handle_t cxt_mgr)
         return;
     }
 
-    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     if (!ite6805_handle)
     {
         debug_msg("Error: cannot get ite6805_handle");
@@ -961,7 +993,7 @@ void board_v4l2_resume(cxt_mgr_handle_t cxt_mgr)
         return;
     }
 
-    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[CL511H_I2C_CHIP_ITE6805_0];
+    ite6805_handle = board_v4l2_cxt->i2c_chip_handle[GC573_I2C_CHIP_ITE6805_0];
     if (!ite6805_handle)
     {
         debug_msg("Error: cannot get ite6805_handle");

@@ -314,17 +314,19 @@ typedef enum
 typedef enum
 {
 	AVER_XILINX_FMT_YUYV = 0,
-	AVER_XILINX_FMT_UYVY,
-	AVER_XILINX_FMT_YVYU,
-	AVER_XILINX_FMT_VYUY,
-	AVER_XILINX_FMT_RGBP,
-	AVER_XILINX_FMT_RGBR,
-	AVER_XILINX_FMT_RGBO,
-	AVER_XILINX_FMT_RGBQ,
-	AVER_XILINX_FMT_RGB3,
-	AVER_XILINX_FMT_BGR3,
-	AVER_XILINX_FMT_RGB4,
-	AVER_XILINX_FMT_BGR4,	
+	AVER_XILINX_FMT_UYVY, //1
+	AVER_XILINX_FMT_YVYU, //2, not available
+	AVER_XILINX_FMT_VYUY, //3, not available
+	AVER_XILINX_FMT_YVU420, //YV12
+	AVER_XILINX_FMT_NV12, //5
+	AVER_XILINX_FMT_RGBP, //6, not available
+	AVER_XILINX_FMT_RGBR, //7, not available
+	AVER_XILINX_FMT_RGBO, //8, not available
+	AVER_XILINX_FMT_RGBQ, //9, not available
+	AVER_XILINX_FMT_RGB3, //0x0a, not available
+	AVER_XILINX_FMT_BGR3, //0x0b
+	AVER_XILINX_FMT_RGB4, //0x0c
+	AVER_XILINX_FMT_BGR4, //0x0d, not available
 }aver_xilinx_pixfmt_e;
 
 typedef enum
@@ -450,6 +452,9 @@ void aver_xilinx_set_audio_dma(handle_t aver_xilinx_handle,aver_xilinx_audio_cfg
 void aver_xilinx_start_audio_streaming(handle_t aver_xilinx_handle,aver_xilinx_audio_cbinfo_t *cb_info);
 void aver_xilinx_stop_audio_streaming(handle_t aver_xilinx_handle);
 void aver_xilinx_add_to_cur_desclist(handle_t aver_xilinx_handle,unsigned long phys_addr,unsigned size);
+#if 1 //[AVTLD-79]+
+void aver_xilinx_translate_desclist(handle_t aver_xilinx_handle, unsigned int size, unsigned int size_2, unsigned int size_3);
+#endif //[AVTLD-79]-
 void aver_xilinx_active_current_desclist(handle_t aver_xilinx_handle,aver_xilinx_callback_t callback,void *cb_cxt);
 void aver_xilinx_config_video_process(handle_t aver_xilinx_handle,aver_xilinx_video_process_cfg_t *vip_cfg);
 void aver_xilinx_get_frameinfo(handle_t aver_xilinx_handle,aver_xilinx_frame_info_t *frameinfo,U32_T pixelclock); 

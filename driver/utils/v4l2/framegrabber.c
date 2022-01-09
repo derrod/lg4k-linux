@@ -9,6 +9,9 @@
  *      Version:
  * =================================================================
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 #include "typedef.h"
 #include <stdarg.h>
 #include <linux/kernel.h>
@@ -32,21 +35,24 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "4:2:2, packed, YUYV",
 		.fourcc   = V4L2_PIX_FMT_YUYV,
 		.depth    = 16,
+		.num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = YUYV,
 	},
-	#if 0
 	[FRAMEGRABBER_PIXFMT_UYVY]={ //UYVY
 		.name     = "4:2:2, packed, UYVY",
 		.fourcc   = V4L2_PIX_FMT_UYVY,
 		.depth    = 16,
+		.num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = UYVY,
 	},
+#if 0
 	[FRAMEGRABBER_PIXFMT_YVYU]={ //YVYU
 		.name     = "4:2:2, packed, YVYU",
 		.fourcc   = V4L2_PIX_FMT_YVYU,
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = YVYU,
 	},
@@ -55,6 +61,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "4:2:2, packed, VYUY",
 		.fourcc   = V4L2_PIX_FMT_VYUY,
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = VYUY,
 	},
@@ -63,6 +70,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB565 (LE)",
 		.fourcc   = V4L2_PIX_FMT_RGB565, /* gggbbbbb rrrrrggg */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBP,
 	},
@@ -70,6 +78,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB565 (BE)",
 		.fourcc   = V4L2_PIX_FMT_RGB565X, /* rrrrrggg gggbbbbb */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBR,
 	},
@@ -77,6 +86,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB555 (LE)",
 		.fourcc   = V4L2_PIX_FMT_RGB555, /* gggbbbbb arrrrrgg */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBO,
 	},
@@ -84,40 +94,79 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB555 (BE)",
 		.fourcc   = V4L2_PIX_FMT_RGB555X, /* arrrrrgg gggbbbbb */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBQ,
 	},
-	#endif
 	[FRAMEGRABBER_PIXFMT_RGB24]={ //RGB3 index=8
 		.name     = "RGB24 (LE)",
 		.fourcc   = V4L2_PIX_FMT_RGB24, /* rgb */
 		.depth    = 24,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGB3,
 	},
-	#if 0
-	[FRAMEGRABBER_PIXFMT_BGR24]={ //BGR3
-		.name     = "RGB24 (BE)",
-		.fourcc   = V4L2_PIX_FMT_BGR24, /* bgr */
-		.depth    = 24,
-		.is_yuv   = false,
-		.pixfmt_out = BGR3,
-	},
-	[FRAMEGRABBER_PIXFMT_RGB32]={ //RGB4
-		.name     = "RGB32 (LE)",
-		.fourcc   = V4L2_PIX_FMT_RGB32, /* argb */
-		.depth    = 32,
-		.is_yuv   = false,
-		.pixfmt_out = RGB4,
-	},
-	[FRAMEGRABBER_PIXFMT_BGR32]={ //BGR4
+#endif
+        [FRAMEGRABBER_PIXFMT_BGR24]={ //BGR3
+                .name     = "RGB24 (BE)",
+                .fourcc   = V4L2_PIX_FMT_BGR24, /* bgr */
+                .depth    = 24,
+                .num_planes = 1,
+                .is_yuv   = false,
+                .pixfmt_out = BGR3,
+        },
+        [FRAMEGRABBER_PIXFMT_RGB32]={ //BA24
+                .name     = "RGB32 (LE)",
+                .fourcc   = V4L2_PIX_FMT_RGB32, /* argb */
+                .depth    = 32,
+                .num_planes = 1,
+                .is_yuv   = false,
+                .pixfmt_out = BA24,
+        },
+#if 0
+        [FRAMEGRABBER_PIXFMT_BGR32]={ //AR24
 		.name     = "RGB32 (BE)",
-		.fourcc   = V4L2_PIX_FMT_BGR32, /* bgra */
+		.fourcc   = V4L2_PIX_FMT_ABGR32, /* bgra */
 		.depth    = 32,
+        	.num_planes = 1,
 		.is_yuv   = false,
-		.pixfmt_out = BGR4,
+		.pixfmt_out = AR24,
 	},
-	#endif
+#endif
+#if 1 //[AVTLD-79]+
+        [FRAMEGRABBER_PIXFMT_NV12]={ //NV12
+                .name     = "NV12",
+                .fourcc   = V4L2_PIX_FMT_NV12, /* NV12M */
+                .depth    = 12,
+                .num_planes = 1,
+                .is_yuv   = true,
+                .pixfmt_out = NV12,
+        },
+        [FRAMEGRABBER_PIXFMT_YV12]={ //YV12
+                .name     = "YV12",
+                .fourcc   = V4L2_PIX_FMT_YVU420, /* YV12 */
+                .depth    = 12,
+                .num_planes = 1,
+                .is_yuv   = true,
+                .pixfmt_out = YVU420,
+        },
+        [FRAMEGRABBER_PIXFMT_NV12M]={ //NV12
+                .name     = "NV12M",
+                .fourcc   = V4L2_PIX_FMT_NV12M, /* NV12M */
+                .depth    = 12,
+                .num_planes = 2,
+                .is_yuv   = true,
+                .pixfmt_out = NV12M,
+        },
+        [FRAMEGRABBER_PIXFMT_YV12M]={ //YV12M
+                .name     = "YV12M",
+                .fourcc   = V4L2_PIX_FMT_YVU420M, /* YV12M */
+                .depth    = 12,
+                .num_planes = 3,
+                .is_yuv   = true,
+                .pixfmt_out = YVU420M,
+        }
+#endif //[AVTLD-79]-
 };
 
 static const framegrabber_frame_size_t framegrabber_support_frame_size[FRAMEGRABBER_SUPPORT_FRAMESIZE_NUM] = {
@@ -218,7 +267,7 @@ framegrabber_handle_t framegrabber_init(cxt_mgr_handle_t cxt_mgr,framegrabber_pr
 		{
 			if(fg_cxt->pixfmt_cap & (1<<i) )
 			{
-				//printk("%s fg_cxt->current_out_pixfmt=%d\n",__func__,i);
+				pr_info("fg_cxt->current_out_pixfmt=%d\n",i);
 				fg_cxt->current_out_pixfmt=i;
 				break;
 			}
@@ -358,7 +407,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
 	current_status &= ~mask;
 	current_status |= (status & mask);
 	diff=current_status ^ context->current_status;
-	//printk("%s diff %08x status %08x=>%08x\n",__func__,diff,context->current_status,current_status);
+	//pr_info("%s diff %08x status %08x=>%08x\n",__func__,diff,context->current_status,current_status);
 	context->current_status=current_status;
 
 
@@ -370,7 +419,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
             // streaming status changed from STOP to START, so we have to set streaming on
             if(handle->stream_on)
             {
-                printk("%s stream_on\n",__func__);
+                pr_info("%s stream_on\n",__func__);
                 handle->stream_on(handle);
             }
         }else
@@ -378,7 +427,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
             // streaming status changed from START to STOP, so we have to set streaming off
             if(handle->stream_off)
             {
-                printk("%s stream_off\n",__func__);
+                pr_info("%s stream_off\n",__func__);
                 handle->stream_off(handle);
             }
         }
@@ -391,7 +440,7 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
             // signal status changed from UNLOCK to LOCK and the current streaming status is START, so we have to set streaming on
             if(handle->stream_on)
             {
-                printk("%s stream_on\n",__func__);
+                pr_info("%s stream_on\n",__func__);
                 handle->stream_on(handle);
             }
         }
@@ -403,14 +452,14 @@ void framegrabber_mask_s_status(framegrabber_handle_t handle,framegrabber_status
 		{
 			if(handle->stream_on)
 			{
-				printk("%s stream_on\n",__func__);
+				pr_info("%s stream_on\n",__func__);
 				handle->stream_on(handle);
 			}
 		}else
 		{
 			if(handle->stream_off)
 			{
-				printk("%s stream_off\n",__func__);
+				pr_info("%s stream_off\n",__func__);
 				handle->stream_off(handle);
 			}
 		}
@@ -519,6 +568,134 @@ void framegrabber_s_out_framesize(framegrabber_handle_t handle,int width,int hei
 		context->interface.s_framesize(handle,width,height);
 }
 
+unsigned framegrabber_g_out_planesize(framegrabber_handle_t handle, int plane) {
+    framegrabber_context_t *context=framegrabber_getcontext(handle);
+    const framegrabber_pixfmt_t *pixfmt;
+    int width, height;
+    unsigned out_planesize;
+
+    if (!context)
+    {
+        pr_err("ERROR: context is NULL");
+        return 0;
+    }
+
+    pixfmt = &support_pixfmts[context->current_out_pixfmt];
+    width = context->current_out_framesize.width;
+    height = context->current_out_framesize.height;
+    out_planesize=0;
+
+    switch (pixfmt->pixfmt_out)
+    {
+        case NV12:
+        case NV12M:
+            if (plane == 1)
+                out_planesize = width * height;
+            else if (plane == 2)
+                out_planesize = (width * height) >> 1;
+            break;
+        case YVU420:
+        case YVU420M: //YV12
+            if (plane == 1)
+                out_planesize = width * height;
+            else if (plane == 2)
+                out_planesize = ((width >> 1) * (height >> 1));
+            else if (plane == 3)
+                out_planesize = ((width >> 1) * (height >> 1));
+            break;
+        case RGB3:
+        case BGR3:
+            if (plane == 1)
+                out_planesize = width * height * 3;
+            break;
+        case AR24:
+        case BA24:
+            if (plane == 1)
+                out_planesize = width * height * 4;
+            break;
+        default:
+            if (plane == 1)
+                out_planesize = width * height * 2;
+            break;
+    }
+
+    return out_planesize;
+}
+
+unsigned framegrabber_g_out_planarbuffersize(framegrabber_handle_t handle, int plane)
+{
+    framegrabber_context_t *context=framegrabber_getcontext(handle);
+    const framegrabber_pixfmt_t *pixfmt;
+    int width, height;
+    unsigned out_planarbufsize;
+
+    if (!context)
+    {
+        pr_err("ERROR: context is NULL");
+        return 0;
+    }
+
+    pixfmt = &support_pixfmts[context->current_out_pixfmt];
+    width = context->current_out_framesize.width;
+    height = context->current_out_framesize.height;
+    out_planarbufsize=0;
+
+    switch (pixfmt->pixfmt_out)
+    {
+        case NV12:
+            if (plane == 1)
+                out_planarbufsize = (width * height) + ((width * height) >> 1);
+//                out_planarbufsize = width * height * 3;
+            break;
+        case NV12M:
+            if (plane == 1)
+                out_planarbufsize = width * height;
+            else if (plane == 2)
+                out_planarbufsize = (width * height) >> 1;
+            break;
+        case YVU420:
+            if (plane == 1 )
+                out_planarbufsize = (width * height) + 2*((width >> 1) * (height >> 1));
+//                out_planarbufsize = width * height * 3;
+            break;
+        case YVU420M: //YV12
+            if (plane == 1)
+                out_planarbufsize = width * height;
+            else if (plane == 2)
+                out_planarbufsize = ((width >> 1) * (height >> 1));
+            else if (plane == 3)
+                out_planarbufsize = ((width >> 1) * (height >> 1));
+            break;
+        case RGB3:
+        case BGR3:
+            if (plane == 1)
+                out_planarbufsize = width * height * 3;
+            break;
+        case AR24:
+        case BA24:
+            if (plane == 1)
+                out_planarbufsize = width * height * 4;
+            break;
+        default:
+            if (plane == 1)
+                out_planarbufsize = width * height * 2;
+            break;
+    }
+
+    return out_planarbufsize;
+}
+
+unsigned framegrabber_g_out_framebuffersize(framegrabber_handle_t handle)
+{
+    unsigned out_framebufsize = 0;
+
+    out_framebufsize += framegrabber_g_out_planarbuffersize(handle, 1);
+    out_framebufsize += framegrabber_g_out_planarbuffersize(handle, 2);
+    out_framebufsize += framegrabber_g_out_planarbuffersize(handle, 3);
+
+    return out_framebufsize;
+}
+
 unsigned framegrabber_g_max_framebuffersize(framegrabber_handle_t handle)
 {
     framegrabber_context_t *context=framegrabber_getcontext(handle);
@@ -530,29 +707,94 @@ unsigned framegrabber_g_max_framebuffersize(framegrabber_handle_t handle)
     return max_framebufsize;
 }
 
-unsigned framegrabber_g_out_bytesperline(framegrabber_handle_t handle)
+unsigned framegrabber_g_out_bytesperline(framegrabber_handle_t handle, int plane)
 {
-	framegrabber_context_t *context=framegrabber_getcontext(handle);
-	const framegrabber_pixfmt_t *pixfmt=framegrabber_g_out_pixelfmt(handle);
-	unsigned bytesperline;
+    framegrabber_context_t *context=framegrabber_getcontext(handle);
 
-//        if(context->max_supported_width)
-//            bytesperline=(context->max_supported_width * pixfmt->depth) >> 3;
-//        else
-//        {
-            if(context->current_out_framesize.width)
-                bytesperline=(context->current_out_framesize.width * pixfmt->depth) >> 3;
-            else
-                bytesperline=(context->current_input_framesize.width * pixfmt->depth) >> 3;
-        //}
+    if (!context)
+    {
+        pr_err("ERROR: context is NULL");
+        return 0;
+    }
 
 
-	return bytesperline;
+    int out_bytesperline = 0;
+    int width;
+    const framegrabber_pixfmt_t *pixfmt;
+
+
+    if(context->current_out_framesize.width) {
+        width = context->current_out_framesize.width;
+    } else {
+        width = context->current_input_framesize.width;
+    }
+
+    pixfmt = &support_pixfmts[context->current_out_pixfmt];
+
+    switch (pixfmt->pixfmt_out)
+    {
+        case NV12:
+        case NV12M:
+            if (plane == 1) {
+                out_bytesperline = width;
+            }
+            else if (plane == 2) {
+                out_bytesperline = width;
+            }
+            break;
+        case YVU420:
+        case YVU420M: //YV12
+            if (plane == 1) {
+                out_bytesperline = width;
+            } else if (plane == 2) {
+                out_bytesperline = width/2;
+            } else if (plane == 3) {
+                out_bytesperline = width/2;
+            }
+            break;
+        case RGB3:
+        case BGR3:
+            if (plane == 1) {
+                out_bytesperline = width * 3;
+            }
+            break;
+        case AR24:
+        case BA24:
+            if (plane == 1) {
+                out_bytesperline = width * 4;
+            }
+            break;
+        default:
+            if (plane == 1) {
+                out_bytesperline = width * 2;
+            }
+            break;
+    }
+
+    return out_bytesperline;
 }
 
 void framegrabber_g_out_framesize(framegrabber_handle_t handle,int *width,int *height)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
+
+    if (context->current_out_framesize.width == 0 || context->current_out_framesize.height == 0) {
+        context->current_out_framesize.width = context->current_input_framesize.width;
+        context->current_out_framesize.height = context->current_input_framesize.height;
+
+        if(context->interface.s_framesize)
+            context->interface.s_framesize(handle, context->current_out_framesize.width, context->current_out_framesize.height);
+    }
+
+    if (context->current_out_framesize.width == 0 || context->current_out_framesize.height == 0) {
+        context->current_out_framesize.width = 1920;
+        context->current_out_framesize.height = 1080;
+
+        pr_warn("width == 0 or height == 0 => setting width = %d, height = %d\n",  context->current_out_framesize.width,  context->current_out_framesize.height);
+
+        if(context->interface.s_framesize)
+            context->interface.s_framesize(handle, context->current_out_framesize.width, context->current_out_framesize.height);
+    }
 
 	*width=context->current_out_framesize.width;
 	*height=context->current_out_framesize.height;
@@ -602,14 +844,14 @@ void framegrabber_s_input_dualmode(framegrabber_handle_t handle,int dual_pixel)
 int framegrabber_g_input_dualmode(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
-    printk(">>>>>%s ..%d\n",__func__,context->current_dual_pixel);
+    pr_info(">>>>>%s ..%d\n",__func__,context->current_dual_pixel);
 	return context->current_dual_pixel;
 }
 
 int framegrabber_g_input_framerate(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
-    //printk(">>>>>%s ..%d\n",__func__,context->current_framerate);
+    //pr_info(">>>>>%s ..%d\n",__func__,context->current_framerate);
 	return context->current_framerate;
 }
 
@@ -627,7 +869,7 @@ void framegrabber_s_input_framerate(framegrabber_handle_t handle,int framerate,i
 
 	context->current_framerate=framerate;
     context->current_denominator=denominator;
-    //printk(">>>>>%s ..%d\n",__func__,context->current_framerate);
+    //pr_info(">>>>>%s ..%d\n",__func__,context->current_framerate);
 }
 
 void framegrabber_s_out_framerate(framegrabber_handle_t handle,int framerate)
@@ -636,14 +878,14 @@ void framegrabber_s_out_framerate(framegrabber_handle_t handle,int framerate)
 
 	context->current_out_framerate=framerate;
     
-    //printk(">>>>>>%s ..%d\n",__func__,context->current_out_framerate);
+    //pr_info(">>>>>>%s ..%d\n",__func__,context->current_out_framerate);
 }
 
 int framegrabber_g_out_framerate(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
 	
-    //printk(">>>>>>>%s ..%d\n",__func__,context->current_out_framerate);
+    //pr_info(">>>>>>>%s ..%d\n",__func__,context->current_out_framerate);
     
 	return context->current_out_framerate;
 }
@@ -654,14 +896,14 @@ void framegrabber_s_input_audioinfo(framegrabber_handle_t handle,enum framegrabb
 
 	context->current_audioinfo=audioinfo;
   
-    //printk(">>>>>%s ..%d\n",__func__,context->current_audioinfo);
+    //pr_info(">>>>>%s ..%d\n",__func__,context->current_audioinfo);
 }
 
 int framegrabber_g_input_audioinfo(framegrabber_handle_t handle)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
 	
-    //printk(">>>>>>>%s ..%d\n",__func__,context->current_audioinfo);
+    //pr_info(">>>>>>>%s ..%d\n",__func__,context->current_audioinfo);
     
 	return context->current_audioinfo;
 }
@@ -674,7 +916,7 @@ int framegrabber_g_input_bchs(framegrabber_handle_t handle,int bchs_select)
     
     //context->current_bchs_selection=*bchs_select;
     
-	//printk("%s current_bchs_value(%d) = %x\n",__func__,context->current_bchs_selection,context->current_bchs_value);
+	//pr_info("%s current_bchs_value(%d) = %x\n",__func__,context->current_bchs_selection,context->current_bchs_value);
 	
 	switch (bchs_select)
 	{
@@ -682,35 +924,35 @@ int framegrabber_g_input_bchs(framegrabber_handle_t handle,int bchs_select)
 		{
 			handle->brightness_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s brightness=%d\n",__func__,*bchs_value);  
+			//pr_info("%s brightness=%d\n",__func__,*bchs_value);
 		    break;
 		}
 		case 1: //contrast
 		{
 			handle->contrast_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s contrast=%d\n",__func__,*bchs_value);   
+			//pr_info("%s contrast=%d\n",__func__,*bchs_value);
 		    break;
 		}
 		case 2: //hue
 		{
 			handle->hue_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s hue=%d\n",__func__,*bchs_value);  
+			//pr_info("%s hue=%d\n",__func__,*bchs_value);
 		    break;
 		}
 		case 3: //saturation
 		{
 			handle->saturation_get(handle,&bchs_value); 
 			//bchs_value = &handle->fg_bchs_value;
-			//printk("%s saturation=%d\n",__func__,bchs_value);  
+			//pr_info("%s saturation=%d\n",__func__,bchs_value);
 		    break;
 		}
 		
 	}
 	
 	//context->current_bchs_value = *bchs_value;
-	//printk("%s bchs_value(%d) = %d\n",__func__,context->current_bchs_selection,context->current_bchs_value);
+	//pr_info("%s bchs_value(%d) = %d\n",__func__,context->current_bchs_selection,context->current_bchs_value);
 	return bchs_value;
 	
 }
@@ -731,7 +973,7 @@ void framegrabber_s_input_bchs(framegrabber_handle_t handle,int bchs_value,int b
     if(handle->bchs_set)
 		handle->bchs_set(handle);   
 	
-	printk("%s current_bchs_value(%d) = %d\n",__func__,bchs_select,context->current_bchs_value);
+	pr_info("%s current_bchs_value(%d) = %d\n",__func__,bchs_select,context->current_bchs_value);
 	
     
 }
@@ -743,7 +985,7 @@ int framegrabber_g_hdcp_state(framegrabber_handle_t handle)
 	int state_value=0;
     
     handle->hdcp_state_get(handle,&state_value);
-    printk("%s hdcp state value=%d\n",__func__,state_value);  
+    pr_info("%s hdcp state value=%d\n",__func__,state_value);
 
 	return state_value;
 	
@@ -811,6 +1053,19 @@ int framegrabber_g_supportframesize(framegrabber_handle_t handle,int index,int *
 	}
 	#endif
 	return FRAMEGRABBER_ERROR_INVALID_FRAMESIZE;
+}
+
+int framegrabber_g_support_framesize(framegrabber_handle_t handle,int width,int height) {
+    int i;
+
+    for(i=0;i<FRAMEGRABBER_SUPPORT_FRAMESIZE_NUM ;i++)
+    {
+        if(framegrabber_support_frame_size[i].width==width && framegrabber_support_frame_size[i].height==height) {
+            return FRAMEGRABBER_OK;
+        }
+    }
+
+    return FRAMEGRABBER_ERROR_INVALID_FRAMESIZE;
 }
 
 int framegrabber_g_framesize_supportrefreshrate(framegrabber_handle_t handle,int width,int height,int index)
@@ -905,7 +1160,7 @@ int framegrabber_g_hdcp_flag(framegrabber_handle_t handle)
     int hdcp_flag;
 	hdcp_flag = context->hdcp_flag;
 	
-	//printk("%s hdcp_flag =%u\n",__func__,hdcp_flag);
+	//pr_info("%s hdcp_flag =%u\n",__func__,hdcp_flag);
 	return hdcp_flag;
 }
 
@@ -915,7 +1170,7 @@ void framegrabber_s_hdcp_flag(framegrabber_handle_t handle, unsigned int hdcp_fl
 	
 	context->hdcp_flag = hdcp_flag;
 	
-	//printk("%s hdcp_flag =%u\n",__func__,hdcp_flag);
+	//pr_info("%s hdcp_flag =%u\n",__func__,hdcp_flag);
 }
 
 int framegrabber_g_i2c(framegrabber_handle_t handle, unsigned char channel, unsigned int slave, unsigned int sub, unsigned char sublen, unsigned char *data, unsigned int datalen, unsigned int is_10bit)
@@ -923,13 +1178,13 @@ int framegrabber_g_i2c(framegrabber_handle_t handle, unsigned char channel, unsi
 	framegrabber_context_t *context = framegrabber_getcontext(handle);
 	if(context == NULL)
 	{
-		printk("param is null!\n");
+		pr_info("param is null!\n");
 		return -1;
 	}
 
 	if(!context->interface.i2c_read)
 	{
-		printk("function pointer is null\n");
+		pr_info("function pointer is null\n");
 		return -1;
 	}
 
@@ -941,13 +1196,13 @@ int framegrabber_s_i2c(framegrabber_handle_t handle, unsigned char channel, unsi
 	framegrabber_context_t *context = framegrabber_getcontext(handle);
 	if(context == NULL)
 	{
-		printk("param is null!\n");
+		pr_info("param is null!\n");
 		return -1;
 	}
 
 	if(!context->interface.i2c_write)
 	{
-		printk("function pointer is null\n");
+		pr_info("function pointer is null\n");
 		return -1;
 	}
 
@@ -959,13 +1214,13 @@ int framegrabber_g_reg(framegrabber_handle_t handle, unsigned int offset, unsign
     framegrabber_context_t *context = framegrabber_getcontext(handle);
     if(context == NULL)
     {
-        printk("param is null!\n");
+        pr_info("param is null!\n");
         return -1;
     }
 
     if(!context->interface.reg_read)
     {
-        printk("function pointer is null\n");
+        pr_info("function pointer is null\n");
         return -1;
     }
 
@@ -977,13 +1232,13 @@ int framegrabber_s_reg(framegrabber_handle_t handle, unsigned int offset, unsign
     framegrabber_context_t *context = framegrabber_getcontext(handle);
     if(context == NULL)
     {
-        printk("param is null!\n");
+        pr_info("param is null!\n");
         return -1;
     }
 
     if(!context->interface.reg_write)
     {
-        printk("function pointer is null\n");
+        pr_info("function pointer is null\n");
         return -1;
     }
 

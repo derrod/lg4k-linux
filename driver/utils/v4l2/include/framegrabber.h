@@ -81,42 +81,50 @@ typedef enum
 typedef enum
 {
 	FRAMEGRABBER_PIXFMT_YUYV=0,
-	#if 0
 	FRAMEGRABBER_PIXFMT_UYVY,
+#if 0
 	FRAMEGRABBER_PIXFMT_YVYU,
 	FRAMEGRABBER_PIXFMT_VYUY,
 	FRAMEGRABBER_PIXFMT_RGB565,
 	FRAMEGRABBER_PIXFMT_RGB565X,
 	FRAMEGRABBER_PIXFMT_RGB555,
 	FRAMEGRABBER_PIXFMT_RGB555X,
-	#endif
 	FRAMEGRABBER_PIXFMT_RGB24,
-	#if 0
+#endif
 	FRAMEGRABBER_PIXFMT_BGR24,
 	FRAMEGRABBER_PIXFMT_RGB32,
+#if 0
 	FRAMEGRABBER_PIXFMT_BGR32,
-	#endif
+#endif
+	FRAMEGRABBER_PIXFMT_NV12,
+    FRAMEGRABBER_PIXFMT_YV12,
+    FRAMEGRABBER_PIXFMT_NV12M,
+    FRAMEGRABBER_PIXFMT_YV12M,
 	FRAMEGRABBER_PIXFMT_MAX,
 }framegrabber_pixfmt_e;
 
 typedef enum
 {
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_YUYV),
-	#if 0
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_UYVY),
+#if 0
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_YVYU),
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_VYUY),
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB565),
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB565X),
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB555),
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB555X),
-	#endif
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB24),
-	#if 0
+#endif
 	EnumtoBitMask(FRAMEGRABBER_PIXFMT_BGR24),
-	EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB32),
-	EnumtoBitMask(FRAMEGRABBER_PIXFMT_BGR32),
-	#endif
+    EnumtoBitMask(FRAMEGRABBER_PIXFMT_RGB32),
+#if 0
+    EnumtoBitMask(FRAMEGRABBER_PIXFMT_BGR32),
+#endif
+	EnumtoBitMask(FRAMEGRABBER_PIXFMT_NV12),
+	EnumtoBitMask(FRAMEGRABBER_PIXFMT_YV12),
+    EnumtoBitMask(FRAMEGRABBER_PIXFMT_NV12M),
+    EnumtoBitMask(FRAMEGRABBER_PIXFMT_YV12M),
 	FRAMEGRABBER_PIXFMT_BITMSK		= (1<<FRAMEGRABBER_PIXFMT_MAX)-1,
 }framegrabber_pixfmt_bitmask_e;
 
@@ -203,20 +211,25 @@ typedef enum
 	UYVY,
 	YVYU,
 	VYUY,
+    YVU420,
+	YVU420M, //YV12
+    NV12,
+    NV12M,
 	RGBP,
 	RGBR,
 	RGBO,
 	RGBQ,
 	RGB3,
 	BGR3,
-	RGB4,
-	BGR4,	
+	BA24,
+	AR24,
 }framegrabber_pixfmt_enum_t;
 
 typedef struct  {
 	const char *name;
 	U32_T   fourcc;          /* v4l2 format id */
 	U8_T    depth;
+    U8_T    num_planes;
 	BOOL_T  is_yuv;
 	framegrabber_pixfmt_enum_t pixfmt_out;
 }framegrabber_pixfmt_t;
@@ -395,9 +408,13 @@ const framegrabber_pixfmt_t *framegrabber_g_out_pixelfmt(framegrabber_handle_t h
 const framegrabber_pixfmt_t *framegrabber_g_support_pixelfmt_by_index(framegrabber_handle_t handle,int index);
 const framegrabber_pixfmt_t *framegrabber_g_support_pixelfmt_by_fourcc(framegrabber_handle_t handle,U32_T fourcc);
 int framegrabber_s_out_pixelfmt(framegrabber_handle_t handle,U32_T fourcc);
+int framegrabber_g_support_framesize(framegrabber_handle_t handle,int width,int height);
 int framegrabber_g_supportframesize(framegrabber_handle_t handle,int index,int *width,int *height);
 int framegrabber_g_framesize_supportrefreshrate(framegrabber_handle_t handle,int width,int height,int index);
 void framegrabber_notify(framegrabber_handle_t handle,char *fromname,int notification,void *arg);
+unsigned framegrabber_g_out_planesize(framegrabber_handle_t handle, int plane);
+unsigned framegrabber_g_out_planarbuffersize(framegrabber_handle_t handle, int plane);
+unsigned framegrabber_g_out_framebuffersize(framegrabber_handle_t handle);
 unsigned framegrabber_g_max_framebuffersize(framegrabber_handle_t handle);
 void framegrabber_s_out_framesize(framegrabber_handle_t handle,int width,int height);
 void framegrabber_g_out_framesize(framegrabber_handle_t handle,int *width,int *height);
@@ -415,7 +432,7 @@ void framegrabber_s_input_framemode(framegrabber_handle_t handle,framegrabber_fr
 void framegrabber_s_input_audioinfo(framegrabber_handle_t handle,enum framegrabber_audio_sample audioinfo);
 int framegrabber_g_input_audioinfo(framegrabber_handle_t handle);
 framegrabber_framemode_e framegrabber_g_input_framemode(framegrabber_handle_t handle);
-unsigned framegrabber_g_out_bytesperline(framegrabber_handle_t handle);
+unsigned framegrabber_g_out_bytesperline(framegrabber_handle_t handle, int plane);
 
 int framegrabber_g_input_bchs(framegrabber_handle_t handle,int bchs_select);
 void framegrabber_s_input_bchs(framegrabber_handle_t handle,int bchs_value,int bchs_select);

@@ -33,18 +33,18 @@ static char *no_signal_pic = NULL;
 module_param(no_signal_pic, charp, 0444);
 MODULE_PARM_DESC(no_signal_pic, "Loading this bitmap file and display it when the input is no signal");
 
-//static char *out_of_range_pic = NULL;
-//module_param(out_of_range_pic, charp, 0444);
-//MODULE_PARM_DESC(out_of_range_pic, "Loading this bitmap file and display it when the content is out of range");
+static char *out_of_range_pic = NULL;
+module_param(out_of_range_pic, charp, 0444);
+MODULE_PARM_DESC(out_of_range_pic, "Loading this bitmap file and display it when the content is out of range");
 
-static char *copy_protetion_pic = NULL;
-module_param(copy_protetion_pic, charp, 0444);
-MODULE_PARM_DESC(copy_protetion_pic, "Loading this bitmap file and display it when the content was protected");
+static char *copy_protection_pic = NULL;
+module_param(copy_protection_pic, charp, 0444);
+MODULE_PARM_DESC(copy_protection_pic, "Loading this bitmap file and display it when the content was protected");
 
 int board_init(void);
 void board_exit(void);
 
-const char *BOARD_NAME="CL511H";
+const char *BOARD_NAME="GC573";
 //pci_model_driver_setup_t pci_setup;
 extern int subsystem_id;
 
@@ -54,7 +54,7 @@ pci_model_id_t id_table[]={
       .device=0x0054, //according to hw DEVICE ID config
       .sub_vendor = 0x1461,
       .sub_device = 0x5730,
-      .driver_data=CL511H,        
+      .driver_data=GC573,
     },
     {
       0
@@ -170,14 +170,14 @@ int board_probe(struct device *dev,unsigned long driver_info)
         ret=board_gpio_init(cxt_mgr);
         if(ret!=0)
         {
-			mesg("board_gpio_init\n");
+			pr_err("board_gpio_init failed\n");
             err=ERROR_BOARD_GPIO_INIT;
             break;
         }
         ret=board_i2c_init(cxt_mgr,driver_info);
         if(ret!=0)
 	    {
-		    mesg("board_i2c_init\n");
+		    pr_err("board_i2c_init failed\n");
             err=ERROR_BOARD_I2C_INIT;
             break;
 	    }   
@@ -186,13 +186,14 @@ int board_probe(struct device *dev,unsigned long driver_info)
         ite6805_handle_1=i2c_model_get_driver_handle(i2c_mgr,ITE6805_DRVNAME);
 	    if(!ite6805_handle_1)
 	    {
-		    break;
+            pr_err("error getting ite6805 handle\n");
+            break;
 	    }
 	    ite6805_add_trace(ite6805_handle_1,trace_handle); 
 	    
-	    mesg("%s subsystem_id=%x\n",__func__,subsystem_id);
+	    pr_info("subsystem_id=%x\n", subsystem_id);
 
-        pic_bmp_init(cxt_mgr, no_signal_pic, NULL, copy_protetion_pic);
+        pic_bmp_init(cxt_mgr, no_signal_pic, out_of_range_pic, copy_protection_pic);
         board_alsa_init(cxt_mgr); 
         board_v4l2_init(cxt_mgr,subsystem_id);  
         //aver_xilinx_sha204_init(aver_xilinx_handle);
@@ -206,10 +207,13 @@ int board_probe(struct device *dev,unsigned long driver_info)
         {
             case ERROR_AVER_XILINX:
                 cxt_manager_unref_context(i2c_mgr);
+                // fall through
             case ERROR_I2C_MGR:
                 cxt_manager_unref_context(gpio_mgr);
+                // fall through
             case ERROR_GPIO_MGR:    
                  cxt_manager_unref_context(trace_handle);
+                // fall through
             case ERROR_TRACE_HANDLE:
                 
             case NO_PCI_HANDLE:
