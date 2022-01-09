@@ -519,7 +519,9 @@ static long v4l2_model_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		case AVER_HDCP_IOCTL_GET_STATE:
 		    pr_info("AVER_HDCP_IOCTL_GET_STATE\n");
 			ret = v4l2_model_ioctl_g_hdcp_state(file, &hdcp_state);
-			copy_to_user ((unsigned int *)arg, &hdcp_state, sizeof(hdcp_state));
+			if (copy_to_user ((unsigned int *)arg, &hdcp_state, sizeof(hdcp_state)) != 0) {
+                		pr_err("AVER_HDCP_IOCTL_GET_STATE copy_to_user() failed\n");
+            		}
 			break;
 
 		case AVER_HDCP_IOCTL_SET_STATE:

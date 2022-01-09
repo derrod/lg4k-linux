@@ -226,16 +226,23 @@ static unsigned int debug_ctl_store(void *cxt, const char *buf, unsigned int cou
                             {
                                 *end=0;
                                 end++;
-                                if(start[0])
-                                    kstrtoint(start,10,&lineno);
-                                else
-                                    lineno=1;
+                                if(start[0]) {
+                                    if (kstrtoint(start, 10, &lineno) != 0) {
+                                        lineno = 1;
+                                    }
+                                } else {
+                                    lineno = 1;
+                                }
                                 debug_ctrl.start_line=lineno;
-                                kstrtoint(end,10,&lineno);
+                                if (kstrtoint(end,10,&lineno) != 0) {
+                                    lineno = 1;
+                                }
                                 debug_ctrl.end_line=lineno;
                             }else
                             {
-                                kstrtoint(start,10,&lineno);
+                                if (kstrtoint(start,10,&lineno) != 0) {
+                                    lineno = 1;
+                                }
                                 debug_ctrl.start_line=lineno;
                                 debug_ctrl.end_line=lineno;
                             }
