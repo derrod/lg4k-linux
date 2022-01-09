@@ -340,7 +340,7 @@ int mesg(const char *fmt,...)
     va_list args;
     int r;
 
-    tmp = kmalloc(sizeof (KBUILD_MODNAME ": ") + strlen(fmt), GFP_KERNEL);
+    tmp = kzalloc(sizeof (KBUILD_MODNAME ": ") + strlen(fmt), GFP_ATOMIC);
     if ( !tmp )
         return -1;
 
