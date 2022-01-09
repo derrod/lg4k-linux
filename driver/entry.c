@@ -17,10 +17,11 @@
 #include <linux/version.h>
 #include <linux/pci.h>
 #include "aver_version.h"
+#include "board.h"
 
 //#define DRIVER_VER "1.0.0026"
-int board_init(void);
-void board_exit(void);
+//int board_init(void);
+//void board_exit(void);
 static int __init aver_init(void)
 {
     int ret=0;

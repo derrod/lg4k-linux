@@ -46,6 +46,9 @@ typedef struct
     int index;
 }board_chip_desc_t;
 
+int board_init(void);
+void board_exit(void);
+
 #ifdef __cplusplus
 }
 #endif
