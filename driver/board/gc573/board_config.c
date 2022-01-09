@@ -170,14 +170,14 @@ int board_probe(struct device *dev,unsigned long driver_info)
         ret=board_gpio_init(cxt_mgr);
         if(ret!=0)
         {
-			mesg("board_gpio_init\n");
+			pr_err("board_gpio_init failed\n");
             err=ERROR_BOARD_GPIO_INIT;
             break;
         }
         ret=board_i2c_init(cxt_mgr,driver_info);
         if(ret!=0)
 	    {
-		    mesg("board_i2c_init\n");
+		    pr_err("board_i2c_init failed\n");
             err=ERROR_BOARD_I2C_INIT;
             break;
 	    }   
@@ -186,11 +186,12 @@ int board_probe(struct device *dev,unsigned long driver_info)
         ite6805_handle_1=i2c_model_get_driver_handle(i2c_mgr,ITE6805_DRVNAME);
 	    if(!ite6805_handle_1)
 	    {
-		    break;
+            pr_err("error getting ite6805 handle\n");
+            break;
 	    }
 	    ite6805_add_trace(ite6805_handle_1,trace_handle); 
 	    
-	    mesg("%s subsystem_id=%x\n",__func__,subsystem_id);
+	    pr_info("subsystem_id=%x\n", subsystem_id);
 
         pic_bmp_init(cxt_mgr, no_signal_pic, out_of_range_pic, copy_protection_pic);
         board_alsa_init(cxt_mgr); 

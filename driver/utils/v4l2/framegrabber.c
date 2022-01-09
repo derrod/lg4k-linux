@@ -221,7 +221,7 @@ framegrabber_handle_t framegrabber_init(cxt_mgr_handle_t cxt_mgr,framegrabber_pr
 		{
 			if(fg_cxt->pixfmt_cap & (1<<i) )
 			{
-				//pr_info("%s fg_cxt->current_out_pixfmt=%d\n",__func__,i);
+				pr_info("fg_cxt->current_out_pixfmt=%d\n",i);
 				fg_cxt->current_out_pixfmt=i;
 				break;
 			}

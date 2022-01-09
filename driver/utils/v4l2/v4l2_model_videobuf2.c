@@ -173,7 +173,7 @@ static int v4l2_model_qops_queue_setup(struct vb2_queue *q,
 		    *num_buffers;
 		callback_item->callback(&callback_item->data);
 	}
-	pr_info("%s >>>>>\n", __func__);
+
 	return 0;
 }
 
@@ -346,7 +346,7 @@ static void v4l2_model_qops_buf_cleanup(struct vb2_buffer *vb)
 	    container_of(vb, v4l2_model_vb2_buffer_t, vb);
 #endif
 	int i;
-	pr_info("=====================%s vb %p \n", __func__, vb);
+	pr_info("===================== vb %p \n", vb);
 
 	//return; //rr3
 
@@ -693,7 +693,7 @@ void v4l2_model_next_buffer(v4l2_model_handle_t context,
 
 	spin_lock_irqsave(&vb2_context->queuelock, flags);
 	if (list_empty(&vb2_context->buffer_list)) {
-		//pr_info("%s vb2 queue is empty\n", __func__);
+		pr_info("vb2 queue is empty\n");
 		*buffer_info = NULL;
 		spin_unlock_irqrestore(&vb2_context->queuelock, flags);
 		return;
@@ -894,7 +894,7 @@ void v4l2_model_feed_video_data(v4l2_model_handle_t context, void *buffer, SIZE_
                                                 memcpy(lb,b,s);\
 					}else \
                                         { \
-                                                pr_info("copy may out of framebuf size %u offset %lu size %lu !\n",framebuf_size,(unsigned long)(lb-framebuf),(unsigned long)s) ;\
+                                                pr_warn("copy may out of framebuf size %u offset %lu size %lu !\n",framebuf_size,(unsigned long)(lb-framebuf),(unsigned long)s) ;\
 					}\
 				}
 

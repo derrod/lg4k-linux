@@ -263,14 +263,14 @@ static mem_model_dma_buffer_t *mem_model_dma_pool_alloc_mem(mem_model_handle_t m
             if( buffer_item)
             {
                 
-                
+                 
                 dma_buffer=&buffer_item->dma_buffer;
                 //dma_buffer->phys_addr=(unsigned long int)dma_addr;
                 dma_buffer->phys_addr=dma_addr;
                 dma_buffer->vaddr=vaddr;
                 dma_buffer->size=dma_pool->cfg.size;
                 queue_add_tail(&buffer_item->queue,&dma_pool->buffer_queue);
-                debug_msg("%s dma_addr %llx dma_buffer->phys_addr %lx\n",__func__,dma_addr,dma_buffer->phys_addr);
+                pr_info("dma_addr %llx dma_buffer->phys_addr %lx dma_buffer->size %ld\n",dma_addr,dma_buffer->phys_addr, dma_buffer->size);
             }
         }   
     }

@@ -9,7 +9,8 @@
  *      Version:
  * =================================================================
  */
- 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " "%s, %d: " fmt, __func__, __LINE__
+
 //#include <linux/kernel.h>
 #include "board.h"
 #include "cxt_mgr.h"
@@ -227,15 +228,17 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     //framegrabber_s_out_framerate(board_v4l2_cxt->fg_handle,0);
     
     framegrabber_g_out_framesize(board_v4l2_cxt->fg_handle,&out_width,&out_height);
-    debug_msg("%s in %dx%d out %dx%d\n",__func__,width,height,out_width,out_height);
-    
+
     if ((out_width ==0) || (out_height ==0))
     {
-        debug_msg("debug...\n");
+        pr_info("Output framesize is not set: Setting to 1920x1080\n");
+
         out_width = 1920;
         out_height = 1080;
         framegrabber_s_out_framesize(board_v4l2_cxt->fg_handle,1920,1080);
     }
+
+    pr_info("in %dx%d out %dx%d\n",width, height,out_width,out_height);
 
     if(framemode==FRAMEGRABBER_FRAMEMODE_INTERLACED)
         vip_cfg.in_videoformat.is_interlace=TRUE;
@@ -257,10 +260,10 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     
     framegrabber_s_input_audioinfo(board_v4l2_cxt->fg_handle,audio_rate);
 
-    mesg("%s...vip_cfg.audio_rate_index=%d\n",__func__,vip_cfg.audio_rate);
+    pr_info("vip_cfg.audio_rate_index=%d\n", vip_cfg.audio_rate);
     ite6805_get_frameinfo(ite6805_handle,fe_frameinfo);
     
-    debug_msg("%s========fe_frameinfo->packet_colorspace=%d\n",__func__,fe_frameinfo->packet_colorspace);
+    pr_info("fe_frameinfo->packet_colorspace=%d\n", fe_frameinfo->packet_colorspace);
     
     vip_cfg.in_videoformat.fps = framegrabber_g_input_framerate(board_v4l2_cxt->fg_handle);
     //if(vip_cfg.is_interlace==TRUE)
@@ -283,7 +286,7 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     vip_cfg.in_ddrmode = fe_frameinfo->ddr_mode;
     //vip_cfg.out_framerate= 0; //for test
     vip_cfg.out_videoformat.fps=frameinterval;
-    mesg("%s..in_framerate=%d  out_framerate=%d pixel_clock=%d\n",__func__,vip_cfg.in_videoformat.fps,vip_cfg.out_videoformat.fps,vip_cfg.pixel_clock);
+    pr_info("in_framerate=%d  out_framerate=%d, pixel_clock=%d, in_ddrmode=%d\n",vip_cfg.in_videoformat.fps,vip_cfg.out_videoformat.fps,vip_cfg.pixel_clock, vip_cfg.in_ddrmode);
 
     ite6805_get_workingmode(ite6805_handle, &(vip_cfg.in_workingmode)) ;
     vip_cfg.in_colorspacemode = 0; // 0-yuv, 1-rgb limit, 2-rgb full
@@ -291,9 +294,12 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     vip_cfg.in_videoformat.colorspace = VIDEO_RGB_MODE;
     vip_cfg.in_packetsamplingmode = 1; // 0-rgb, 1-422, 2-444	
     vip_cfg.in_packetcsc_bt = COLORMETRY_ITU709;
+
     ite6805_get_sampingmode(ite6805_handle, &(vip_cfg.in_packetsamplingmode));
     vip_cfg.currentCSC = CAPTURE_BT709_COMPUTER;
-	
+
+    pr_info("in_colorspacemode = %d, in_packetsamplingmode = %d, in_videoformat_colorspace = %d\n", vip_cfg.in_colorspacemode , (int) vip_cfg.in_videoformat.colorspace, vip_cfg.in_packetsamplingmode);
+
     //enable video bypass
     if (((vip_cfg.in_videoformat.vactive == 4096) && (vip_cfg.out_videoformat.width == 4096)
        && (vip_cfg.out_videoformat.height == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //4096x2160
@@ -319,13 +325,13 @@ static void gc573_stream_on(framegrabber_handle_t handle)
        && (vip_cfg.in_videoformat.hactive == 1080) && (vip_cfg.out_videoformat.height == 1080)
        && (vip_cfg.in_videoformat.fps == 120)))
     {
-		mesg("%s bypass = 1.. in %dx%d out %dx%d\n",__func__,vip_cfg.in_videoformat.vactive, vip_cfg.in_videoformat.hactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
+		pr_info("bypass = 1.. in %dx%d out %dx%d\n",vip_cfg.in_videoformat.hactive, vip_cfg.in_videoformat.vactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
         //aver_xilinx_video_bypass(board_v4l2_cxt->aver_xilinx_handle,1); //enable video bypass
         vip_cfg.video_bypass = 1;
 	}
 	else
 	{
-		mesg("%s bypass = 0.. in %dx%d out %dx%d\n",__func__,vip_cfg.in_videoformat.vactive,vip_cfg.in_videoformat.hactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
+		pr_info("bypass = 0.. in %dx%d out %dx%d\n",vip_cfg.in_videoformat.hactive,vip_cfg.in_videoformat.vactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
 		//aver_xilinx_video_bypass(board_v4l2_cxt->aver_xilinx_handle,0); //disable video bypass
 		vip_cfg.video_bypass = 0;
 	}
@@ -406,7 +412,7 @@ static void gc573_brightness_read(framegrabber_handle_t handle,int *brightness)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*brightness = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *brightness;
-	debug_msg("%s get brightness=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("brightness=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 static void gc573_contrast_read(framegrabber_handle_t handle,int *contrast)
 {
@@ -419,7 +425,7 @@ static void gc573_contrast_read(framegrabber_handle_t handle,int *contrast)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*contrast = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *contrast;
-	debug_msg("%s get contrast=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("contrast=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 
 static void gc573_hue_read(framegrabber_handle_t handle,int *hue)
@@ -433,7 +439,7 @@ static void gc573_hue_read(framegrabber_handle_t handle,int *hue)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*hue = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *hue;
-	debug_msg("%s get hue=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("hue=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 
 static void gc573_saturation_read(framegrabber_handle_t handle,int *saturation)
@@ -447,7 +453,7 @@ static void gc573_saturation_read(framegrabber_handle_t handle,int *saturation)
 	//framegrabber_set_data(handle,board_v4l2_cxt);
 	*saturation = board_v4l2_cxt->cur_bchs_value;
 	//handle->fg_bchs_value = *saturation;
-	debug_msg("%s get saturation=%x\n",__func__,board_v4l2_cxt->cur_bchs_value);
+	pr_info("saturation=%x\n",board_v4l2_cxt->cur_bchs_value);
 }
 
 static void gc573_bchs_write(framegrabber_handle_t handle)
@@ -465,10 +471,10 @@ static void gc573_bchs_write(framegrabber_handle_t handle)
 		//framegrabber_s_input_bchs(board_v4l2_cxt->fg_handle,board_v4l2_cxt->cur_bchs_value,board_v4l2_cxt->cur_bchs_selection);
 		//ite6805_set_bchs(ite6805_handle,&bchs_value,&bchs_select); 
         //aver_xilinx_set_bchs(board_v4l2_cxt->aver_xilinx_handle,bchs_value,bchs_select); 
-		if (bchs_select ==0) debug_msg("set brightness=%d\n",bchs_value);
-		if (bchs_select ==1) debug_msg("set contrast=%d\n",bchs_value);
-		if (bchs_select ==2) debug_msg("set hue=%d\n",bchs_value);
-		if (bchs_select ==3) debug_msg("set saturation=%d\n",bchs_value);
+		if (bchs_select ==0) pr_info("set brightness=%d\n",bchs_value);
+		if (bchs_select ==1) pr_info("set contrast=%d\n",bchs_value);
+		if (bchs_select ==2) pr_info("set hue=%d\n",bchs_value);
+		if (bchs_select ==3) pr_info("set saturation=%d\n",bchs_value);
 	}
 }
 
@@ -562,7 +568,7 @@ static void gc573_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
 {
     board_v4l2_context_t *board_v4l2_cxt=cb_info->asso_data;
     v4l2_model_buffer_info_t *buffer_info=cb_info->u.buffer_prepare_info.buffer_info;
-    //mesg("%s %p buffer_info %p\n",__func__,board_v4l2_cxt,buffer_info);
+    pr_debug("context %p buffer_info %p\n",board_v4l2_cxt,buffer_info);
     if(buffer_info)
     {
         int i;
@@ -608,7 +614,7 @@ static void gc573_v4l2_buffer_init(v4l2_model_callback_parameter_t *cb_info)
         //mesg("buf type %d count %d\n",buffer_info->buf_type,buffer_info->buf_count[0]);
         for(i=0,desc=buffer_info->buf_info[0];i<buffer_info->buf_count[0];i++)
         {
-            //mesg("addr %08x size %x\n",desc[i].addr,desc[i].size);
+            pr_info("addr %08lx size %lx\n",desc[i].addr,desc[i].size);
         } 
     }  
 }
@@ -633,9 +639,7 @@ static void check_signal_stable_task(void *data)
     aver_xilinx_frame_info_t detected_frameinfo;
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     BOOL_T is_interlace;
-    
-    debug_msg("%s\n",__func__);
-    
+
     //ite6805_get_frameinfo(ite6805_handle,fe_frameinfo);
     //debug_msg("%s ite6805 detected size %dx%d;framerate %d \n",__func__,fe_frameinfo->width,fe_frameinfo->height,fe_frameinfo->framerate);
         
@@ -650,8 +654,8 @@ static void check_signal_stable_task(void *data)
     else
         dual_pixel_set = detected_frameinfo.width; 
     
-    debug_msg("%s framegrabber size %dx%d\n",__func__,width,height);
-    debug_msg("%s fpga detected size %dx%d\n",__func__,detected_frameinfo.width,detected_frameinfo.height);
+    pr_info("framegrabber size %dx%d%c\n",width,height,(fe_frameinfo->is_interlace) ?'i':'p');
+    pr_info("fpga detected size %dx%d%c\n",detected_frameinfo.width,detected_frameinfo.height,(detected_frameinfo.is_interlace) ?'i':'p');
     if((((detected_frameinfo.width<320 || detected_frameinfo.height<240)) || (width !=/*detected_frameinfo.width*/dual_pixel_set)|| (height !=detected_frameinfo.height)) && (cnt_retry<3))
     {
 		cnt_retry++;
@@ -659,9 +663,7 @@ static void check_signal_stable_task(void *data)
         task_model_run_task_after(board_v4l2_cxt->task_model_handle,board_v4l2_cxt->check_signal_task_handle,100000);
         return;
     }
-    
-    //debug_msg("%s fpga detected size %dx%d\n",__func__,detected_frameinfo.width,detected_frameinfo.height);
-   
+
     if (fe_frameinfo->is_interlace)
     {
 		detected_frameinfo.width = fe_frameinfo->width;
@@ -711,8 +713,8 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
     {
     case ITE6805_LOCK:
     {
-        //debug_msg("ITE6805_LOCK\n");
-        //aver_xilinx_get_frameinfo(aver_xilinx_handle,&detected_frameinfo,fe_frameinfo->pixel_clock); 
+        pr_info("ITE6805_LOCK\n");
+//        aver_xilinx_get_frameinfo(board_v4l2_cxt->aver_xilinx_handle,&detected_frameinfo,fe_frameinfo->pixel_clock);
         
         {
             //aver_xilinx_color_adjust_control(board_v4l2_cxt->aver_xilinx_handle);
@@ -720,8 +722,8 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
             
 //            aver_xilinx_hdmi_hotplug(board_v4l2_cxt->aver_xilinx_handle);
         
-            mesg("%s locked fe %dx%d%c\n",__func__,fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace)?'i':'p'/*,fe_frameinfo->framerate*/);
-            //debug_msg("pixclock %d colorspace %d\n",fe_frameinfo->pixel_clock,fe_frameinfo->colorspace);
+            pr_info("locked fe %dx%d%c %dHz %d\n",fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace)?'i':'p', fe_frameinfo->framerate, fe_frameinfo->denominator);
+            pr_info("pixclock %d\n",fe_frameinfo->pixel_clock);
    
 //work around for ITE6805 detect issue      
             if ((fe_frameinfo->is_interlace==0) && ((fe_frameinfo->height == 240) || (fe_frameinfo->height == 288)))
@@ -771,7 +773,7 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
             //debug_msg("=========== ite6805_set_out_format=%02x\n",out_format);
         }
         //sys_msleep(100);
-        //debug_msg("pixelclock %d detected %dx%d%c\n",fe_frameinfo->pixel_clock,detected_frameinfo.width,detected_frameinfo.height,(detected_frameinfo.is_interlace) ?'i':'p');
+        pr_info("pixelclock %d detected %dx%d%c\n",fe_frameinfo->pixel_clock,fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace) ?'i':'p');
         framegrabber_s_input_status(board_v4l2_cxt->fg_handle,FRAMEGRABBER_INPUT_STATUS_OK);
         framegrabber_mask_s_status(board_v4l2_cxt->fg_handle,FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT,FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT);
 
@@ -779,7 +781,7 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
     }
         break;
     case ITE6805_UNLOCK:
-        //debug_msg("ITE6805_UNLOCK\n");
+        pr_info("ITE6805_UNLOCK\n");
         framegrabber_s_hdcp_flag(board_v4l2_cxt->fg_handle,0);
         framegrabber_s_input_framesize(board_v4l2_cxt->fg_handle,0,0); //tt 0615
         framegrabber_mask_s_status(board_v4l2_cxt->fg_handle,FRAMEGRABBER_STATUS_SIGNAL_LOCKED_BIT,0);
@@ -787,7 +789,7 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
         break;
         
     case ITE6805_HDCP:
-        //debug_msg("ITE6805_HDCP\n");
+        pr_info("ITE6805_HDCP\n");
         ite6805_get_hdcp_level(ite6805_handle, &hdcp_flag);
 		framegrabber_s_hdcp_flag(board_v4l2_cxt->fg_handle,hdcp_flag);
 		break;    
@@ -923,7 +925,7 @@ void board_v4l2_init(cxt_mgr_handle_t cxt_mgr, int board_id)
         default:
             break;
         }
-        debug_msg("%s err %d\n", __func__, err);
+        pr_err("err %d\n", err);
     }
 }
 

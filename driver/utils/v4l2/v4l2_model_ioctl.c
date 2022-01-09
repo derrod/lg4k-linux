@@ -421,12 +421,12 @@ int v4l2_model_ioctl_s_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 	int ret = v4l2_model_ioctl_try_fmt_vid_cap(file, fh, f);
 	if (ret < 0)
 	{
-		pr_info("%s..\n",__func__);
+		pr_err("try_vid_cap failed\n");
 		return ret;
 	}
 
 	if (vb2_is_busy(&v4l2m_context->queue)) {
-		pr_info("%s.\n",__func__);
+		pr_warn("vb2 is busy\n");
 	    return -EBUSY;
 	}
 
@@ -598,7 +598,7 @@ int v4l2_model_ioctl_g_parm(struct file *file, void *fh,struct v4l2_streamparm *
 
 	if (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 	{
-		pr_info("%s..\n",__func__);
+		pr_err("unsupported video buffer type");
 	    return -EINVAL;
 	}
 
@@ -669,14 +669,14 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		    bchs_select = V4L2_BCHS_TYPE_BRIGHTNESS;
 		    //adv7619_get_bchs(v4l2m_context->adv7619_handle,&BCHSinfo,bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
-            pr_info("%s...brightness(%d)\n",__func__,ctrl->value);
+            pr_info("brightness(%d)\n",ctrl->value);
 			ret = 0;
 			break;
 
 		case V4L2_CID_CONTRAST:
 	
 			bchs_select = V4L2_BCHS_TYPE_CONTRAST;
-		    pr_info("%s...contrast(%d)\n",__func__,bchs_select);
+		    pr_info("contrast(%d)\n",bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
 			ret = 0;
 			break;
@@ -684,7 +684,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		case V4L2_CID_SATURATION:
 			
 			bchs_select = V4L2_BCHS_TYPE_SATURATION;
-		    pr_info("%s...saturation(%d)\n",__func__,bchs_select);
+		    pr_info("saturation(%d)\n",bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
 			ret = 0;
 			break;
@@ -692,7 +692,7 @@ int v4l2_model_ioctl_g_ctrl(struct file *file, void *fh,struct v4l2_control *a)/
 		case V4L2_CID_HUE:
 		
 			bchs_select = V4L2_BCHS_TYPE_HUE;
-		    pr_info("%s...hue(%d)\n",__func__,bchs_select);
+		    pr_info("hue(%d)\n",bchs_select);
             ctrl->value = framegrabber_g_input_bchs(v4l2m_context->framegrabber_handle,bchs_select);
 			ret = 0;
 			break; // 
