@@ -237,7 +237,7 @@ int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capabilit
 		//else
 		    strncpy(cap->card, v4l2m_context->device_info.card_name,sizeof(cap->card));    
         
-        sprintf(cap->bus_info, "%s", dev_name(v4l2m_context->dev));
+        sprintf(cap->bus_info, "PCIe:%s", dev_name(v4l2m_context->dev));
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(4,18,0)
 		if(v4l2m_context->device_info.capabilities)
 		{
