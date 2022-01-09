@@ -214,7 +214,6 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     ite6805_frameinfo_t *fe_frameinfo=&board_v4l2_cxt->cur_fe_frameinfo; 
     
     //aver_xilinx_frame_info_t detected_frameinfo;
-    mesg("%s\n",__func__);
     //aver_xilinx_get_frameinfo(board_v4l2_cxt->aver_xilinx_handle,&detected_frameinfo);
     framemode=framegrabber_g_input_interlace(board_v4l2_cxt->fg_handle);
     framegrabber_g_input_framesize(board_v4l2_cxt->fg_handle,&width,&height);
@@ -235,7 +234,7 @@ static void gc573_stream_on(framegrabber_handle_t handle)
 
         out_width = 1920;
         out_height = 1080;
-        framegrabber_s_out_framesize(board_v4l2_cxt->fg_handle,1920,1080);
+        framegrabber_s_out_framesize(board_v4l2_cxt->fg_handle,out_width,out_height);
     }
 
     pr_info("in %dx%d out %dx%d\n",width, height,out_width,out_height);
@@ -269,8 +268,8 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     //if(vip_cfg.is_interlace==TRUE)
         //vip_cfg.in_framerate = vip_cfg.in_framerate * 2;
     vip_cfg.packet_colorspace = fe_frameinfo->packet_colorspace;    
-    vip_cfg.in_videoformat.vactive = width;
-    vip_cfg.in_videoformat.hactive = height;
+    vip_cfg.in_videoformat.vactive = height;
+    vip_cfg.in_videoformat.hactive = width;
     //if (vip_cfg.in_videoformat.is_interlace==TRUE)
         //vip_cfg.in_videoformat.hactive *= 2; 
     vip_cfg.out_videoformat.width=out_width;
@@ -301,28 +300,28 @@ static void gc573_stream_on(framegrabber_handle_t handle)
     pr_info("in_colorspacemode = %d, in_packetsamplingmode = %d, in_videoformat_colorspace = %d\n", vip_cfg.in_colorspacemode , (int) vip_cfg.in_videoformat.colorspace, vip_cfg.in_packetsamplingmode);
 
     //enable video bypass
-    if (((vip_cfg.in_videoformat.vactive == 4096) && (vip_cfg.out_videoformat.width == 4096)
-       && (vip_cfg.out_videoformat.height == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //4096x2160
-       ((vip_cfg.in_videoformat.vactive == 3840) && (vip_cfg.out_videoformat.width == 3840)
-       && (vip_cfg.out_videoformat.height == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //3840x2160
-       ((vip_cfg.in_videoformat.vactive == 2560) && (vip_cfg.out_videoformat.width == 2560)  
-       && (vip_cfg.in_videoformat.hactive == 1600) && (vip_cfg.out_videoformat.height == 1600)) || //2560x1600
-       ((vip_cfg.in_videoformat.vactive == 2560) && (vip_cfg.out_videoformat.width == 2560) 
-       && (vip_cfg.in_videoformat.hactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //2560x1440
-       ((vip_cfg.in_videoformat.vactive == 2560) && (vip_cfg.out_videoformat.width == 2560) 
-       && (vip_cfg.in_videoformat.hactive == 1080) && (vip_cfg.out_videoformat.height == 1080)) ||  //2560x1080
-       ((vip_cfg.in_videoformat.vactive == 1920) && (vip_cfg.out_videoformat.width == 1920) 
-       && (vip_cfg.in_videoformat.hactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //1920x1440
-       ((vip_cfg.in_videoformat.vactive == 1856) && (vip_cfg.out_videoformat.width == 1856)
-       && (vip_cfg.in_videoformat.hactive == 1392) && (vip_cfg.out_videoformat.height == 1392)) || //1856x1392
-       ((vip_cfg.in_videoformat.vactive == 1792) && (vip_cfg.out_videoformat.width == 1792)
-       && (vip_cfg.in_videoformat.hactive == 1344) && (vip_cfg.out_videoformat.height == 1344)) || //1792x1344
-       ((vip_cfg.in_videoformat.vactive == 2048) && (vip_cfg.out_videoformat.width == 2048)
-       && (vip_cfg.in_videoformat.hactive == 1152) && (vip_cfg.out_videoformat.height == 1152)) || //2048x1152
-       ((vip_cfg.in_videoformat.vactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
-       && (vip_cfg.in_videoformat.hactive == 1200) && (vip_cfg.out_videoformat.height == 1200)) || //1920x1200
-       ((vip_cfg.in_videoformat.vactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
-       && (vip_cfg.in_videoformat.hactive == 1080) && (vip_cfg.out_videoformat.height == 1080)
+    if (((vip_cfg.in_videoformat.hactive == 4096) && (vip_cfg.out_videoformat.width == 4096)
+       && (vip_cfg.in_videoformat.vactive == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //4096x2160
+       ((vip_cfg.in_videoformat.hactive == 3840) && (vip_cfg.out_videoformat.width == 3840)
+       && (vip_cfg.in_videoformat.vactive == 2160) && (vip_cfg.out_videoformat.height == 2160)) || //3840x2160
+       ((vip_cfg.in_videoformat.hactive == 2560) && (vip_cfg.out_videoformat.width == 2560)
+       && (vip_cfg.in_videoformat.vactive == 1600) && (vip_cfg.out_videoformat.height == 1600)) || //2560x1600
+       ((vip_cfg.in_videoformat.hactive == 2560) && (vip_cfg.out_videoformat.width == 2560)
+       && (vip_cfg.in_videoformat.vactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //2560x1440
+       ((vip_cfg.in_videoformat.hactive == 2560) && (vip_cfg.out_videoformat.width == 2560)
+       && (vip_cfg.in_videoformat.vactive == 1080) && (vip_cfg.out_videoformat.height == 1080)) ||  //2560x1080
+       ((vip_cfg.in_videoformat.hactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
+       && (vip_cfg.in_videoformat.vactive == 1440) && (vip_cfg.out_videoformat.height == 1440)) || //1920x1440
+       ((vip_cfg.in_videoformat.hactive == 1856) && (vip_cfg.out_videoformat.width == 1856)
+       && (vip_cfg.in_videoformat.vactive == 1392) && (vip_cfg.out_videoformat.height == 1392)) || //1856x1392
+       ((vip_cfg.in_videoformat.hactive == 1792) && (vip_cfg.out_videoformat.width == 1792)
+       && (vip_cfg.in_videoformat.vactive == 1344) && (vip_cfg.out_videoformat.height == 1344)) || //1792x1344
+       ((vip_cfg.in_videoformat.hactive == 2048) && (vip_cfg.out_videoformat.width == 2048)
+       && (vip_cfg.in_videoformat.vactive == 1152) && (vip_cfg.out_videoformat.height == 1152)) || //2048x1152
+       ((vip_cfg.in_videoformat.hactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
+       && (vip_cfg.in_videoformat.vactive == 1200) && (vip_cfg.out_videoformat.height == 1200)) || //1920x1200
+       ((vip_cfg.in_videoformat.hactive == 1920) && (vip_cfg.out_videoformat.width == 1920)
+       && (vip_cfg.in_videoformat.vactive == 1080) && (vip_cfg.out_videoformat.height == 1080)
        && (vip_cfg.in_videoformat.fps == 120)))
     {
 		pr_info("bypass = 1.. in %dx%d out %dx%d\n",vip_cfg.in_videoformat.hactive, vip_cfg.in_videoformat.vactive,vip_cfg.out_videoformat.width,vip_cfg.out_videoformat.height);
@@ -338,26 +337,42 @@ static void gc573_stream_on(framegrabber_handle_t handle)
 	
     switch(pixfmt->pixfmt_out)
     {
-        case AVER_XILINX_FMT_YUYV:
-        case AVER_XILINX_FMT_UYVY:
-        case AVER_XILINX_FMT_YVYU:
-        case AVER_XILINX_FMT_VYUY:
+        case YUYV:
+        case YVYU:
+        case VYUY:
             vip_cfg.pixel_format=AVER_XILINX_FMT_YUYV;
-            mesg("%s...vip_cfg.pixel_format_output=AVER_XILINX_FMT_YUYV\n",__func__);
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_YUYV\n");
             break;
-        case AVER_XILINX_FMT_RGBP: //RGB565
-        case AVER_XILINX_FMT_RGBR: //RGB565X
-        case AVER_XILINX_FMT_RGBO:
-        case AVER_XILINX_FMT_RGBQ:
-        case AVER_XILINX_FMT_RGB3: //RGB24 4:4:4
-        case AVER_XILINX_FMT_BGR3: 
-        case AVER_XILINX_FMT_RGB4:
-        case AVER_XILINX_FMT_BGR4:
-            vip_cfg.pixel_format=AVER_XILINX_FMT_RGB3;
-            mesg("%s...vip_cfg.pixel_format=AVER_XILINX_FMT_RGB3\n",__func__);
+        case UYVY:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_UYVY;
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_UYVY\n");
+            break;
+        case YVU420:
+        case YVU420M: //YV12
+            vip_cfg.pixel_format=AVER_XILINX_FMT_YVU420;
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_YVU420\n");
+            break;
+        case NV12:
+        case NV12M:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_NV12;
+            pr_info("vip_cfg.pixel_format_output=AVER_XILINX_FMT_NV12\n");
+            break;
+        case RGBP: //RGB565
+        case RGBR: //RGB565X
+        case RGBO:
+        case RGBQ:
+        case RGB3: //RGB24 4:4:4
+        case BGR3:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_BGR3;
+            pr_info("vip_cfg.pixel_format=AVER_XILINX_FMT_BGR3\n");
+            break;
+        case AR24: //fall through
+        case BA24:
+            vip_cfg.pixel_format=AVER_XILINX_FMT_RGB4;
+            pr_info("vip_cfg.pixel_format=AVER_XILINX_FMT_RGB4\n");
             break;
         default:
-            vip_cfg.pixel_format=AVER_XILINX_CS_YUV422;
+            vip_cfg.pixel_format=AVER_XILINX_FMT_YUYV;
             break;
     }       
     aver_xilinx_config_video_process(board_v4l2_cxt->aver_xilinx_handle,&vip_cfg);
@@ -571,32 +586,40 @@ static void gc573_v4l2_buffer_prepare(v4l2_model_callback_parameter_t *cb_info)
     pr_debug("context %p buffer_info %p\n",board_v4l2_cxt,buffer_info);
     if(buffer_info)
     {
-        int i;
+        int i, j;
         v4l2_model_buf_desc_t *desc;
-        unsigned framebufsize,remain;
-        int width,height;
-        unsigned bytesperline;
-        
-        framegrabber_g_out_framesize(board_v4l2_cxt->fg_handle,&width,&height);
-        bytesperline=framegrabber_g_out_bytesperline(board_v4l2_cxt->fg_handle);
-        framebufsize=bytesperline*height; 
-        //debug_msg("%s %dx%d framesize %u\n",__func__,width,height,framebufsize);
-      //  mesg("buf type %d count %d\n",buffer_info->buf_type,buffer_info->buf_count[0]);
-        for(i=0,desc=buffer_info->buf_info[0],remain=framebufsize;i<buffer_info->buf_count[0];i++)
-        {
-            if(remain >= desc[i].size)
-            {
-                aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle,desc[i].addr,desc[i].size);
-                remain -= desc[i].size;
-            }else
-            {
-                aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle,desc[i].addr,remain);
-                remain =0;
-                break;
+        unsigned remain;
+        unsigned sizes[3];
+        unsigned plane_sizes[3];
+
+        sizes[2] = framegrabber_g_out_planarbuffersize(board_v4l2_cxt->fg_handle, 3);
+        sizes[1] = framegrabber_g_out_planarbuffersize(board_v4l2_cxt->fg_handle, 2);
+        sizes[0] = framegrabber_g_out_planarbuffersize(board_v4l2_cxt->fg_handle, 1);
+
+
+//        debug_msg("%s %dx%d framesize %u\n",__func__,width,height,framebufsize);
+
+        for(j=0; j < buffer_info->planes; j ++) {
+            pr_debug("plane %d buf_type %d count %d\n", j, buffer_info->buf_type, buffer_info->buf_count[j]);
+            for (i = 0, desc = buffer_info->buf_info[j], remain = sizes[j]; i < buffer_info->buf_count[j]; i++) {
+                if (remain >= desc[i].size) {
+                    aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle, desc[i].addr, desc[i].size);
+                    remain -= desc[i].size;
+                } else {
+                    aver_xilinx_add_to_cur_desclist(board_v4l2_cxt->aver_xilinx_handle, desc[i].addr, remain);
+                    remain = 0;
+                    break;
+                }
+
+                pr_debug("addr %08lx size %lx\n", desc[i].addr, desc[i].size);
             }
-                
-            //mesg("addr %08x size %x\n",desc[i].addr,desc[i].size);
         }
+
+        plane_sizes[2] = framegrabber_g_out_planesize(board_v4l2_cxt->fg_handle, 3);
+        plane_sizes[1] = framegrabber_g_out_planesize(board_v4l2_cxt->fg_handle, 2);
+        plane_sizes[0] = framegrabber_g_out_planesize(board_v4l2_cxt->fg_handle, 1);
+
+        aver_xilinx_translate_desclist(board_v4l2_cxt->aver_xilinx_handle, plane_sizes[0], plane_sizes[1], plane_sizes[2]);
 
         aver_xilinx_active_current_desclist(board_v4l2_cxt->aver_xilinx_handle,gc573_video_buffer_done,board_v4l2_cxt);
     }  
@@ -737,8 +760,15 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
             {
                 //debug_msg("ITE6805 framerate adapter\n");	
                 fe_frameinfo->framerate /= 2;
-            } 
+            }
+
             ite6805_get_hdcp_level(ite6805_handle, &hdcp_flag);
+
+            U8_T state;
+            if (gc573_i2c_read(board_v4l2_cxt->fg_handle, 0, 0x70, 0xd0, 1, &state, 1, 0) == 0){
+                hdcp_flag = hdcp_flag | (state&1);
+            }
+
             *fe_audioinfo = aver_xilinx_get_audioinfo(board_v4l2_cxt->aver_xilinx_handle);		
             framegrabber_s_input_audioinfo(board_v4l2_cxt->fg_handle,*fe_audioinfo);
 			 
@@ -749,7 +779,7 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
             framegrabber_s_input_framesize(board_v4l2_cxt->fg_handle,fe_frameinfo->width,fe_frameinfo->height); //tt 0602
             
             framegrabber_s_input_dualmode(board_v4l2_cxt->fg_handle,fe_frameinfo->dual_pixel); //tt 1003
-            
+
             framegrabber_s_hdcp_flag(board_v4l2_cxt->fg_handle,hdcp_flag);
             
             //aver_xilinx_dual_pixel(board_v4l2_cxt->aver_xilinx_handle,fe_frameinfo->dual_pixel);
@@ -770,7 +800,7 @@ static void gc573_ite6805_event(void *cxt,ite6805_event_e event)
                 ite6805_set_out_format(ite6805_handle,out_format);
                 //ite6805_set_out_format(board_v4l2_cxt->i2c_chip_handle[CX511H_I2C_CHIP_ITE6805_1],ITE6805_OUT_FORMAT_SDR_ITU656_24_MODE0);
             }
-            //debug_msg("=========== ite6805_set_out_format=%02x\n",out_format);
+            pr_info("ite6805_set_out_format=%02x\n",out_format);
         }
         //sys_msleep(100);
         pr_info("pixelclock %d detected %dx%d%c\n",fe_frameinfo->pixel_clock,fe_frameinfo->width,fe_frameinfo->height,(fe_frameinfo->is_interlace) ?'i':'p');

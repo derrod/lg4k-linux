@@ -71,34 +71,37 @@ static struct v4l2_file_operations v4l2_model_fops = {
 
 
 static struct v4l2_ioctl_ops v4l2_model_ioctl_ops = {
-	.vidioc_reqbufs             = vb2_ioctl_reqbufs,
-	.vidioc_create_bufs         = vb2_ioctl_create_bufs,
-	.vidioc_prepare_buf         = vb2_ioctl_prepare_buf,
-	.vidioc_querybuf            = vb2_ioctl_querybuf,
-	.vidioc_qbuf                = vb2_ioctl_qbuf,
-	.vidioc_dqbuf               = vb2_ioctl_dqbuf,
-	.vidioc_streamon 			= vb2_ioctl_streamon,
-	.vidioc_streamoff 			= vb2_ioctl_streamoff,
+	.vidioc_reqbufs             	= vb2_ioctl_reqbufs,
+	.vidioc_create_bufs         	= vb2_ioctl_create_bufs,
+	.vidioc_prepare_buf         	= vb2_ioctl_prepare_buf,
+	.vidioc_querybuf            	= vb2_ioctl_querybuf,
+	.vidioc_qbuf                	= vb2_ioctl_qbuf,
+	.vidioc_dqbuf               	= vb2_ioctl_dqbuf,
+	.vidioc_streamon 		= vb2_ioctl_streamon,
+	.vidioc_streamoff 		= vb2_ioctl_streamoff,
 
 	.vidioc_querycap      		= v4l2_model_ioctl_querycap,
 	.vidioc_enum_fmt_vid_cap	= v4l2_model_ioctl_enum_fmt_vid_cap,
 	.vidioc_g_fmt_vid_cap		= v4l2_model_ioctl_g_fmt_vid_cap,
-	.vidioc_try_fmt_vid_cap  	= v4l2_model_ioctl_try_fmt_vid_cap,
+//    	.vidioc_g_fmt_vid_cap_mplane	= v4l2_model_ioctl_g_fmt_vid_cap_mplane,
+    	.vidioc_try_fmt_vid_cap  	= v4l2_model_ioctl_try_fmt_vid_cap,
+//    	.vidioc_try_fmt_vid_cap_mplane  = v4l2_model_ioctl_try_fmt_vid_cap_mplane,
 	.vidioc_s_fmt_vid_cap     	= v4l2_model_ioctl_s_fmt_vid_cap,
+//    	.vidioc_s_fmt_vid_cap_mplane 	= v4l2_model_ioctl_s_fmt_vid_cap_mplane,
 	.vidioc_enum_framesizes   	= v4l2_model_ioctl_enum_framesizes,
 	.vidioc_enum_input    		= v4l2_model_ioctl_enum_input,
 	.vidioc_g_input       		= v4l2_model_ioctl_g_input,
 	.vidioc_s_input       		= v4l2_model_ioctl_s_input,
-	.vidioc_enum_frameintervals = v4l2_model_ioctl_enum_frameintervals,
+	.vidioc_enum_frameintervals 	= v4l2_model_ioctl_enum_frameintervals,
 	.vidioc_g_parm        		= v4l2_model_ioctl_g_parm,
 	.vidioc_s_parm        		= v4l2_model_ioctl_s_parm,
 	.vidioc_g_ctrl        		= v4l2_model_ioctl_g_ctrl,
 	.vidioc_s_ctrl        		= v4l2_model_ioctl_s_ctrl,
-	.vidioc_queryctrl           = v4l2_model_ioctl_queryctrl,
-	//.vidioc_g_edid				= v4l2_model_ioctl_g_edid,
-	//.vidioc_s_edid				= v4l2_model_ioctl_s_edid,
+	.vidioc_queryctrl           	= v4l2_model_ioctl_queryctrl,
+	//.vidioc_g_edid		= v4l2_model_ioctl_g_edid,
+	//.vidioc_s_edid		= v4l2_model_ioctl_s_edid,
 	
-	//.vidioc_cropcap				= v4l2_model_ioctl_cropcap,
+	//.vidioc_cropcap		= v4l2_model_ioctl_cropcap,
     //.vidioc_s_dv_timings        = v4l2_model_ioctl_s_dv_timings,
     //.vidioc_g_dv_timings        = v4l2_model_ioctl_g_dv_timings,
 #if 0
@@ -184,7 +187,8 @@ v4l2_model_handle_t v4l2_model_init(cxt_mgr_handle_t cxt_mgr,v4l2_model_device_s
 
 		    vdev = &context->vdev;
 #if LINUX_VERSION_CODE > KERNEL_VERSION(4,18,0)
-			vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+//			vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_READWRITE;
+            vdev->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING | V4L2_CAP_READWRITE;
 #endif
 	        vdev->release = video_device_release_empty;
 	    	vdev->v4l2_dev = &context->v4l2_dev;

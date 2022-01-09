@@ -35,7 +35,7 @@
 // defaults for ADV7619
 #define BrightnessDefault  0x200
 #define ContrastDefault    0x100
-#define SaturationDefault  0x100
+#define SaturationDefault  0x80
 #define HueDefault         0x00
 //static U32_T SharpnessDefault  = 0x00;
 
@@ -49,10 +49,10 @@
 #define MAX_VAMP_CONTRAST_UNITS     0x1ff
 
 #define MIN_VAMP_SATURATION_UNITS   0
-#define MAX_VAMP_SATURATION_UNITS   360
+#define MAX_VAMP_SATURATION_UNITS   0x1ff
 
 #define MIN_VAMP_HUE_UNITS          0
-#define MAX_VAMP_HUE_UNITS          0x1ff
+#define MAX_VAMP_HUE_UNITS          360
 
 
 int brightness_tmp=0;
@@ -244,7 +244,8 @@ int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capabilit
 			cap->device_caps = v4l2_model_to_v4l2_caps(v4l2m_context->device_info.capabilities) ;	
 		}
 #else
-		cap->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_STREAMING;
+//		cap->device_caps = V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_STREAMING;
+        cap->device_caps = v4l2m_context->vdev.device_caps;
 #endif
 		cap->capabilities = cap->device_caps | V4L2_CAP_DEVICE_CAPS;
 	}
@@ -253,164 +254,405 @@ int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capabilit
 
 int v4l2_model_ioctl_enum_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fmtdesc *f)
 {
-	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	U32_T index = f->index;
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+    U32_T index = f->index;
 
+    if(f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE && f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+    {
+        pr_err("ENUM_FMT with invalid type: %d\n", f->type);
+        return -EINVAL;
+    }
 
-	if(f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
-	{
-		pr_info("%s.\n",__func__);
-		return -EINVAL;
-	}
+    if(v4l2m_context)
+    {
+        const framegrabber_pixfmt_t *pixfmt;
 
-	if(v4l2m_context)
-	{
-		const framegrabber_pixfmt_t *pixfmt;
-		if(f->index <0)
-		{
-			return -EINVAL;
-		}
-		if(f->index >= FRAMEGRABBER_PIXFMT_MAX)
-		{
-			return -EINVAL;
-		}
-		else
-		{
-		    pixfmt=framegrabber_g_support_pixelfmt_by_index(v4l2m_context->framegrabber_handle,f->index);
-		    //pr_info("%s..pixfmt=%d.\n",__func__,f->index);
-		    f->index = index;
-		    f->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		    strlcpy(f->description, pixfmt->name, sizeof(f->description));
-		    f->pixelformat=pixfmt->fourcc;
-		}
-		
-		
-		if(pixfmt==NULL)
-			return -EINVAL;
-        //pr_info("%s....pixfmt=%d.\n",__func__,f->index);
-		strlcpy(f->description, pixfmt->name, sizeof(f->description));
-		f->pixelformat=pixfmt->fourcc;
-	}
+        if(f->index <0)
+        {
+            return -EINVAL;
+        }
 
-	return 0;
-	
+        if(f->index >= FRAMEGRABBER_PIXFMT_MAX)
+        {
+            return -EINVAL;
+        }
+
+        pixfmt=framegrabber_g_support_pixelfmt_by_index(v4l2m_context->framegrabber_handle,f->index);
+
+        if(pixfmt==NULL)
+            return -EINVAL;
+
+        if ((pixfmt->num_planes > 1) && (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE)) {
+            return -EINVAL;
+        }
+
+        pr_info("%s pixfmt=%d\n", pixfmt->name, f->index);
+        f->index = index;
+
+        strlcpy(f->description, pixfmt->name, sizeof(f->description));
+        f->pixelformat=pixfmt->fourcc;
+    }
+
+    return 0;
+
 }
 
 
 int v4l2_model_ioctl_g_fmt_vid_cap(struct file *file, void *fh,struct v4l2_format *f)
 {
-	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	const framegrabber_pixfmt_t *pixfmt;
-	BOOL_T interlace_mode;
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+    const framegrabber_pixfmt_t *pixfmt;
+    BOOL_T interlace_mode;
 
-	pixfmt=framegrabber_g_out_pixelfmt(v4l2m_context->framegrabber_handle);
-	interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle); 
-	if(pixfmt)
-	{
-		int width,height;
-		//unsigned bytesperline;
+    if (f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+        pr_err("G_FMT with invalid type: %d\n", f->type);
+        return -EINVAL;
+    }
 
-		framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle,&width,&height);
-		//bytesperline=framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle);
-        //pr_info("%s..f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+    interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle);
+    pixfmt=framegrabber_g_out_pixelfmt(v4l2m_context->framegrabber_handle);
 
-		f->fmt.pix.width=width;
-		f->fmt.pix.height=height;
-		f->fmt.pix.field=V4L2_FIELD_NONE; //Field
-		f->fmt.pix.pixelformat  = pixfmt->fourcc;
+    if (!pixfmt || pixfmt->num_planes > 1) {
+        pr_err("numplanes > 1 while type is single planar\n");
+        pixfmt = framegrabber_g_support_pixelfmt_by_index(v4l2m_context->framegrabber_handle,0);
+        framegrabber_s_out_pixelfmt(v4l2m_context->framegrabber_handle, pixfmt->fourcc);
+    }
 
-		//f->fmt.pix.bytesperline = bytesperline;
-		f->fmt.pix.bytesperline = (f->fmt.pix.width * pixfmt->depth) >> 3;
-		f->fmt.pix.sizeimage =	f->fmt.pix.height * f->fmt.pix.bytesperline;
-		if (pixfmt->is_yuv)
-			f->fmt.pix.colorspace = V4L2_COLORSPACE_REC709;
-		else
-			f->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+    if(pixfmt)
+    {
+        int width,height;
+        unsigned bytesperline;
+        unsigned sizeimage;
 
-        
-        if (interlace_mode)  
-        {
-			//f->fmt.pix.height = height*2;
-			f->fmt.pix.field=V4L2_FIELD_INTERLACED;
-		}
-		//pr_info("%s....f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
-		return 0;
-	} 
+        framegrabber_g_out_framesize(v4l2m_context->framegrabber_handle, &width, &height);
 
-	return -EINVAL;
+        if(framegrabber_g_support_framesize(v4l2m_context->framegrabber_handle, width, height) != FRAMEGRABBER_OK) {
+
+            framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle, &width, &height);
+
+            if (width == 0 || height == 0) {
+                width = 1920;
+                height = 1080;
+            }
+            pr_warn("no correct output framesize defined, using %dx%d\n", width, height);
+            framegrabber_s_out_framesize(v4l2m_context->framegrabber_handle, width, height);
+        }
+
+        bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, 1);
+        sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, 1);
+
+        pr_info("pixelformat = %s bytesperline = %d and sizeimage = %d\n", pixfmt->name, bytesperline, sizeimage);
+
+        f->fmt.pix.width = width;
+        f->fmt.pix.height = height;
+        f->fmt.pix.field = V4L2_FIELD_NONE; //Field
+        f->fmt.pix.pixelformat = pixfmt->fourcc;
+
+        f->fmt.pix.bytesperline = bytesperline;
+        f->fmt.pix.sizeimage = sizeimage;
+        if (pixfmt->is_yuv) {
+            f->fmt.pix.colorspace = V4L2_COLORSPACE_REC709;
+            f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+            f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+            f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+        } else {
+            f->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+            f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+            f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+            f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+        }
+
+        if (interlace_mode) {
+            //f->fmt.pix.height = height*2;
+            f->fmt.pix.field = V4L2_FIELD_INTERLACED;
+        }
+
+        //pr_info("%s....f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+        return 0;
+    }
+
+    return -EINVAL;
 }
+
+int v4l2_model_ioctl_g_fmt_vid_cap_mplane(struct file *file, void *fh,struct v4l2_format *f) {
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+    const framegrabber_pixfmt_t *pixfmt;
+    BOOL_T interlace_mode;
+
+    if (f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+        pr_err("G_FMT with invalid type: %d\n", f->type);
+        return -EINVAL;
+    }
+
+    interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle);
+
+    pixfmt=framegrabber_g_out_pixelfmt(v4l2m_context->framegrabber_handle);
+    if (!pixfmt) {
+        pr_warn("no output pixelformat defined\n");
+        pixfmt = framegrabber_g_support_pixelfmt_by_index(v4l2m_context->framegrabber_handle,0);
+        framegrabber_s_out_pixelfmt(v4l2m_context->framegrabber_handle, pixfmt->fourcc);
+    }
+
+    if(pixfmt) {
+        int width, height;
+        int i;
+
+        framegrabber_g_out_framesize(v4l2m_context->framegrabber_handle, &width, &height);
+
+        if(framegrabber_g_support_framesize(v4l2m_context->framegrabber_handle, width, height) != FRAMEGRABBER_OK) {
+
+            framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle, &width, &height);
+
+            if (width == 0 || height == 0) {
+                width = 1920;
+                height = 1080;
+            }
+            pr_warn("no correct output framesize defined, using %dx%d\n", width, height);
+            framegrabber_s_out_framesize(v4l2m_context->framegrabber_handle, width, height);
+        }
+
+        if (pixfmt->num_planes == 1) {
+            f->fmt.pix.bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, 1);
+            f->fmt.pix.sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, 1);
+
+            if (pixfmt->is_yuv) {
+                f->fmt.pix.colorspace = V4L2_COLORSPACE_REC709;
+                f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+                f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+                f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+            } else {
+                f->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+                f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+                f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+                f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+            }
+
+            if (interlace_mode) {
+                //f->fmt.pix.height = height*2;
+                f->fmt.pix.field = V4L2_FIELD_INTERLACED;
+            } else {
+                f->fmt.pix.field = V4L2_FIELD_NONE;
+            }
+
+            f->fmt.pix.priv = 0;
+        }
+
+        pr_info("pixelformat %s on %d planes with size %dx%d\n", pixfmt->name, pixfmt->num_planes, width, height);
+
+        f->fmt.pix_mp.num_planes = pixfmt->num_planes;
+        f->fmt.pix_mp.width = width;
+        f->fmt.pix_mp.height = height;
+        f->fmt.pix_mp.field = V4L2_FIELD_NONE; //Field
+        f->fmt.pix_mp.pixelformat = pixfmt->fourcc;
+
+        if (pixfmt->is_yuv) {
+            f->fmt.pix_mp.colorspace = V4L2_COLORSPACE_REC709;
+            f->fmt.pix_mp.xfer_func = V4L2_XFER_FUNC_709;
+            f->fmt.pix_mp.ycbcr_enc = V4L2_YCBCR_ENC_709;
+        } else {
+            f->fmt.pix_mp.colorspace = V4L2_COLORSPACE_SRGB;
+            f->fmt.pix_mp.xfer_func = V4L2_XFER_FUNC_SRGB;
+            f->fmt.pix_mp.ycbcr_enc = V4L2_YCBCR_ENC_BT2020;
+        }
+
+        if (interlace_mode)
+        {
+            //f->fmt.pix.height = height*2;
+            f->fmt.pix_mp.field=V4L2_FIELD_INTERLACED;
+        }
+
+        for (i=0; i < pixfmt->num_planes; i++) {
+            f->fmt.pix_mp.plane_fmt[i].bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, i+1);
+            f->fmt.pix_mp.plane_fmt[i].sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, i+1);
+
+            pr_info("plane[%d]: set bytesperline %d and sizeimage %d\n", i, f->fmt.pix_mp.plane_fmt[i].bytesperline, f->fmt.pix_mp.plane_fmt[i].sizeimage);
+        }
+
+        return 0;
+    }
+
+    return -EINVAL;
+}
+
 
 int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_format *f)
 {
-	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	const framegrabber_pixfmt_t *fmt;
-	int width,height;
-	BOOL_T interlace_mode;
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+    const framegrabber_pixfmt_t *pixfmt;
+    BOOL_T interlace_mode;
+
+    if (f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+        pr_err("TRY_FMT with invalid type: %d\n", f->type);
+        return -EINVAL;
+    }
+
     //pr_info("%s>>f->fmt.pix.width=%d.f->fmt.pix.height=%d.f->fmt.pix.pixelformat=%d\n",__func__,f->fmt.pix.width,f->fmt.pix.height,f->fmt.pix.pixelformat);
-	fmt = framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle, f->fmt.pix.pixelformat);
-        
-	framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle,&width,&height);
-	
-    interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle); 
-        
-    if(!fmt)
+    pixfmt = framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle, f->fmt.pix.pixelformat);
+    if(!pixfmt || pixfmt->num_planes > 1)
     {
-		pr_info("%s..\n",__func__);
-        return 0;
-	}
+        pr_warn("fmt is not valid\n");
+        pixfmt = framegrabber_g_support_pixelfmt_by_index(v4l2m_context->framegrabber_handle,0);
 
-	//if(width!=0 && height!=0) 
-	{
-		if ((f->fmt.pix.width <320) || (f->fmt.pix.width >4096) || (f->fmt.pix.height <240) || (f->fmt.pix.height >2160))
-		{
-		    if (interlace_mode)
-		    {
-		        f->fmt.pix.width=width;
-		        //f->fmt.pix.height=height*2;
-		        f->fmt.pix.field =V4L2_FIELD_INTERLACED; //field order
-		        //pr_info("%s>f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
-		    }
-		    else
-		    {
-			    f->fmt.pix.width=width;
-		        f->fmt.pix.height=height;
-		        f->fmt.pix.field = V4L2_FIELD_NONE;
-		    }
-		}
-		else
-		{
-			if ((f->fmt.pix.height == height) && interlace_mode)
-			{
-			    //f->fmt.pix.height=height*2;  
-			    f->fmt.pix.field =V4L2_FIELD_INTERLACED;
-			    //pr_info("%s f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
-			}
-			else
-			{
-				f->fmt.pix.field = V4L2_FIELD_NONE;
-			}
-		}
-	}
-	if ((f->fmt.pix.width ==0) || (f->fmt.pix.height ==0))
-	{
-		f->fmt.pix.width = 1920;
-		f->fmt.pix.height = 1080;
-	}
-	
-	
-	f->fmt.pix.bytesperline = (f->fmt.pix.width * fmt->depth) >> 3;
-	f->fmt.pix.sizeimage =f->fmt.pix.height * f->fmt.pix.bytesperline;
-        
-	if (fmt!=NULL && fmt->is_yuv)
-		f->fmt.pix.colorspace = V4L2_COLORSPACE_REC709;//V4L2_COLORSPACE_SMPTE170M;
-	else
-		f->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+        f->fmt.pix.pixelformat = pixfmt->fourcc;
+    }
 
-	f->fmt.pix.priv = 0;
-        
+    interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle);
+
+    if(framegrabber_g_support_framesize(v4l2m_context->framegrabber_handle, f->fmt.pix.width, f->fmt.pix.height) != FRAMEGRABBER_OK) {
+        int width, height;
+
+        pr_warn("framesize %dx%d is not supported\n", f->fmt.pix.width, f->fmt.pix.height);
+
+        framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle, &width, &height);
+
+        if (width == 0 || height == 0) {
+            width = 1920;
+            height = 1080;
+        }
+
+        f->fmt.pix.width = width;
+        f->fmt.pix.height = height;
+    }
+
+    unsigned bytesperline;
+    unsigned sizeimage;
+
+    bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, 1);
+    sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, 1);
+
+    f->fmt.pix.bytesperline = bytesperline;
+    f->fmt.pix.sizeimage = sizeimage;
+
+    if (pixfmt->is_yuv) {
+        f->fmt.pix.colorspace = V4L2_COLORSPACE_REC709;
+        f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+        f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+        f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+    } else {
+        f->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+        f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+        f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+        f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+    }
+
+    if (interlace_mode)
+    {
+        //f->fmt.pix.height = height*2;
+        f->fmt.pix.field=V4L2_FIELD_INTERLACED;
+    } else {
+        f->fmt.pix.field = V4L2_FIELD_NONE;
+    }
+
+    f->fmt.pix.priv = 0;
+
     //pr_info("%s<<f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
-	return 0;
+    return 0;
+}
 
+int v4l2_model_ioctl_try_fmt_vid_cap_mplane(struct file *file, void *fh, struct v4l2_format *f)
+{
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+    const framegrabber_pixfmt_t *pixfmt;
+    BOOL_T interlace_mode;
+    int i;
+
+    if (f->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+        pr_err("TRY_FMT with invalid type: %d\n", f->type);
+        return -EINVAL;
+    }
+
+    pixfmt = framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle, f->fmt.pix_mp.pixelformat);
+    if(!pixfmt)
+    {
+        pr_warn("fmt is not valid\n");
+        pixfmt = framegrabber_g_out_pixelfmt(v4l2m_context->framegrabber_handle);
+
+        f->fmt.pix_mp.pixelformat = pixfmt->fourcc;
+    }
+
+    if (f->fmt.pix_mp.num_planes != pixfmt->num_planes) {
+        pr_warn("wrong number of planes %d\n", f->fmt.pix_mp.num_planes);
+        f->fmt.pix_mp.num_planes = pixfmt->num_planes;
+    }
+
+    interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle);
+
+    if(framegrabber_g_support_framesize(v4l2m_context->framegrabber_handle, f->fmt.pix_mp.width, f->fmt.pix_mp.height) != FRAMEGRABBER_OK) {
+        int width,height;
+
+        pr_warn("framesize %dx%d is not supported\n",  f->fmt.pix_mp.width, f->fmt.pix_mp.height);
+
+        framegrabber_g_input_framesize(v4l2m_context->framegrabber_handle,&width,&height);
+
+        if (width == 0 || height == 0) {
+            width = 1920;
+            height = 1080;
+        }
+
+        if (pixfmt->num_planes == 1) {
+            f->fmt.pix.width=width;
+            f->fmt.pix.height=height;
+        }
+
+        f->fmt.pix_mp.width=width;
+        f->fmt.pix_mp.height=height;
+    }
+
+    if (pixfmt->num_planes == 1) {
+        f->fmt.pix.bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, 1);
+        f->fmt.pix.sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, 1);
+
+        if (pixfmt->is_yuv) {
+            f->fmt.pix.colorspace = V4L2_COLORSPACE_REC709;
+            f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+            f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+            f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+        } else {
+            f->fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
+            f->fmt.pix.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+            f->fmt.pix.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+            f->fmt.pix.quantization = V4L2_QUANTIZATION_DEFAULT;
+        }
+
+        if (interlace_mode) {
+            //f->fmt.pix.height = height*2;
+            f->fmt.pix.field = V4L2_FIELD_INTERLACED;
+        } else {
+            f->fmt.pix.field = V4L2_FIELD_NONE;
+        }
+
+        f->fmt.pix.priv = 0;
+    }
+
+    f->fmt.pix_mp.num_planes = pixfmt->num_planes;
+    f->fmt.pix_mp.field = V4L2_FIELD_NONE; //Field
+    f->fmt.pix_mp.pixelformat = pixfmt->fourcc;
+
+    if (pixfmt->is_yuv) {
+        f->fmt.pix_mp.colorspace = V4L2_COLORSPACE_REC709;
+        f->fmt.pix_mp.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+        f->fmt.pix_mp.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+        f->fmt.pix_mp.quantization = V4L2_QUANTIZATION_DEFAULT;
+    } else {
+        f->fmt.pix_mp.colorspace = V4L2_COLORSPACE_SRGB;
+        f->fmt.pix_mp.xfer_func = V4L2_XFER_FUNC_DEFAULT;
+        f->fmt.pix_mp.ycbcr_enc = V4L2_YCBCR_ENC_DEFAULT;
+        f->fmt.pix_mp.quantization = V4L2_QUANTIZATION_DEFAULT;
+    }
+
+    if (interlace_mode)
+    {
+        //f->fmt.pix.height = height*2;
+        f->fmt.pix_mp.field=V4L2_FIELD_INTERLACED;
+    }
+
+    for (i=0; i < pixfmt->num_planes; i++) {
+        f->fmt.pix_mp.plane_fmt[i].bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, i+1);
+        f->fmt.pix_mp.plane_fmt[i].sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, i+1);
+    }
+
+    //pr_info("%s<<f->fmt.pix.width=%d.f->fmt.pix.height=%d.\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+    return 0;
 }
 
 int v4l2_model_ioctl_s_fmt_vid_cap(struct file *file, void *fh,struct v4l2_format *f)
@@ -430,23 +672,41 @@ int v4l2_model_ioctl_s_fmt_vid_cap(struct file *file, void *fh,struct v4l2_forma
 	    return -EBUSY;
 	}
 
-	/* TODO check setting format is supported */
-
-
-
-   if(framegrabber_g_support_pixelfmt_by_fourcc(v4l2m_context->framegrabber_handle,f->fmt.pix.pixelformat)==NULL)
-   {
-	   pr_info("..%s..\n",__func__);
-	   return -EINVAL;
-   }
-   if(f->fmt.pix.width==0 || f->fmt.pix.height==0)
-   {
-	   pr_info("..%s.\n",__func__);
-	   return -EINVAL;
-   }
-   //pr_info("%s.f->fmt.pix.width=%d..f->fmt.pix.height=%d\n",__func__,f->fmt.pix.width,f->fmt.pix.height);
+   pr_info("f->fmt.pix.width=%d..f->fmt.pix.height=%d..f->fmt.pix.pixelformat=%d\n",f->fmt.pix.width,f->fmt.pix.height,f->fmt.pix.pixelformat);
    framegrabber_s_out_framesize(v4l2m_context->framegrabber_handle,f->fmt.pix.width,f->fmt.pix.height); 
-   framegrabber_s_out_pixelfmt(v4l2m_context->framegrabber_handle,f->fmt.pix.pixelformat); 
+   framegrabber_s_out_pixelfmt(v4l2m_context->framegrabber_handle,f->fmt.pix.pixelformat);
+
+    unsigned bytesperline = framegrabber_g_out_bytesperline(v4l2m_context->framegrabber_handle, 1);
+    unsigned sizeimage = framegrabber_g_out_planarbuffersize(v4l2m_context->framegrabber_handle, 1);
+
+    f->fmt.pix.bytesperline = bytesperline;
+    f->fmt.pix.sizeimage = sizeimage;
+
+    pr_info("bytesperline = %d and sizeimage = %d\n", bytesperline, sizeimage);
+
+    return 0;
+}
+
+int v4l2_model_ioctl_s_fmt_vid_cap_mplane(struct file *file, void *fh,struct v4l2_format *f)
+{
+
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+
+    int ret = v4l2_model_ioctl_try_fmt_vid_cap_mplane(file, fh, f);
+    if (ret < 0)
+    {
+        pr_err("try_vid_cap failed\n");
+        return ret;
+    }
+
+    if (vb2_is_busy(&v4l2m_context->queue)) {
+        pr_info("%s.\n",__func__);
+        return -EBUSY;
+    }
+
+    pr_info("f->fmt.pix_mp.width=%d..f->fmt.pix_mp.height=%d pixelformat=%d\n",f->fmt.pix.width,f->fmt.pix.height, f->fmt.pix_mp.pixelformat);
+    framegrabber_s_out_framesize(v4l2m_context->framegrabber_handle,f->fmt.pix_mp.width,f->fmt.pix_mp.height);
+    framegrabber_s_out_pixelfmt(v4l2m_context->framegrabber_handle,f->fmt.pix_mp.pixelformat);
 
     return 0;
 }
@@ -465,10 +725,8 @@ int v4l2_model_ioctl_enum_framesizes(struct file *file, void *fh, struct v4l2_fr
 		pr_info("%s..\n",__func__);
 		return -EINVAL;
 	}
-	else
-	{
-		//pr_info("%s %08x %x\n",__func__,fsize->pixel_format,pixfmt->fourcc);
-	}
+
+    //pr_info("%s %08x %x\n",__func__,fsize->pixel_format,pixfmt->fourcc);
 
 	if(framegrabber_g_supportframesize(v4l2m_context->framegrabber_handle,fsize->index,&width,&height)!=FRAMEGRABBER_OK)
 	{
@@ -549,101 +807,100 @@ int v4l2_model_ioctl_s_input(struct file *file, void *fh, unsigned int i)
 
 int v4l2_model_ioctl_enum_frameintervals(struct file *file, void *fh, struct v4l2_frmivalenum *fival)
 {
-	int frameinterval=0;
-	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
+    int fivaldenominator=0;
+    int fivalnumerator = 1;
+    v4l2_model_context_t *v4l2m_context = video_drvdata(file);
     BOOL_T interlace_mode;
 
-	
-	interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle); 
+
+    interlace_mode = framegrabber_g_input_interlace(v4l2m_context->framegrabber_handle);
 
 
-	frameinterval=framegrabber_g_framesize_supportrefreshrate(v4l2m_context->framegrabber_handle,fival->width,fival->height,fival->index);
-	if(frameinterval)
-	{
-		//pr_info("%s..\n",__func__);
-		fival->type = V4L2_FRMIVAL_TYPE_DISCRETE;
-		fival->discrete.numerator=1;
-		fival->discrete.denominator=frameinterval;
-	}else
-	{
-		//pr_info("%s.\n",__func__);
-        if(fival->index==0)
-        {
-			//frameinterval = framegrabber_g_out_framerate(v4l2m_context->framegrabber_handle);
-			//if (frameinterval ==0)
-			{
-                frameinterval=framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
-			}
-            fival->type = V4L2_FRMIVAL_TYPE_DISCRETE;
-		    fival->discrete.numerator=1;
-		    //fival->discrete.numerator=1000;
-		    fival->discrete.denominator=frameinterval;
-                
-        }else{
-		    return -EINVAL;
-        }
-	}
-	
-	if (interlace_mode) fival->discrete.denominator /=2;
-	
-	
-    //pr_info("%s.frameinterval =%d.fival->width=%d.fival->height=%d\n",__func__,frameinterval,fival->width,fival->height);
-	return 0;
+    fivaldenominator=framegrabber_g_framesize_supportrefreshrate(v4l2m_context->framegrabber_handle, fival->width, fival->height, fival->index);
+
+    if(fivaldenominator)
+    {
+        pr_info("fivaldenominator = %d\n", fivaldenominator);
+        fival->type = V4L2_FRMIVAL_TYPE_DISCRETE;
+        fival->discrete.numerator=fivalnumerator;
+        fival->discrete.denominator=fivaldenominator;
+    }else{
+        return -EINVAL;
+    }
+
+    if (interlace_mode) fival->discrete.denominator /=2;
+
+
+    //pr_info("%s.fivaldenominator =%d.fival->width=%d.fival->height=%d\n",__func__,fivaldenominator,fival->width,fival->height);
+    return 0;
 }
 
 int v4l2_model_ioctl_g_parm(struct file *file, void *fh,struct v4l2_streamparm *a)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	//int current_denominator;
+    U32_T io_frame_rate;
+    U32_T in_frame_rate;
 
-	if (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
+	if ((a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE) && (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE))
 	{
 		pr_err("unsupported video buffer type");
 	    return -EINVAL;
 	}
 
+    io_frame_rate = framegrabber_g_out_framerate(v4l2m_context->framegrabber_handle);
+    in_frame_rate = framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
+
 	a->parm.capture.capability   = V4L2_CAP_TIMEPERFRAME;
-	a->parm.capture.capturemode  = V4L2_MODE_HIGHQUALITY;
-	a->parm.capture.timeperframe.numerator = 1;
-	//pr_info("%s>>>>>>>>>denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
+
 	a->parm.capture.readbuffers  = 1;
-	//a->parm.capture.timeperframe.denominator = framegrabber_g_out_framerate(v4l2m_context->framegrabber_handle);
-	//pr_info("%s>>>>>>>>>denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
-	if ((a->parm.capture.timeperframe.denominator ==0) || (a->parm.capture.timeperframe.denominator >60)) 
+    a->parm.capture.timeperframe.numerator = 1;
+    a->parm.capture.timeperframe.denominator = io_frame_rate;
+
+	if ((a->parm.capture.timeperframe.denominator ==0) || (a->parm.capture.timeperframe.denominator >144))
 	{
-		a->parm.capture.timeperframe.denominator = framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
-		//pr_info("%s..io_framerate=%d\n",__func__,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
-	}else
-	{//
-		//framegrabbe_s_out_framerate(v4l2m_context->framegrabber_handle,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
-		
-		//pr_info("%s..in_framerate=%d\n",__func__,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator);
-	}
-    
-	return 0;
+        if (in_frame_rate != 0) {
+            a->parm.capture.timeperframe.denominator = in_frame_rate;
+        } else {
+            //If there is no input framerate and no output framerate is set, default to 60
+            a->parm.capture.timeperframe.denominator = REFRESHRATE_60;
+        }
+
+        //If output framerate is not valid, set it to the read value
+        framegrabber_s_out_framerate(v4l2m_context->framegrabber_handle,a->parm.capture.timeperframe.denominator);
+    }
+
+    pr_info("a->parm.capture.timeperframe.denominator=%d a->parm.capture.timeperframe.numerator=%d\n",a->parm.capture.timeperframe.denominator, a->parm.capture.timeperframe.numerator);
+
+    return 0;
 }
 
 int v4l2_model_ioctl_s_parm(struct file *file, void *fh,struct v4l2_streamparm *a)
 {
 	v4l2_model_context_t *v4l2m_context = video_drvdata(file);
-	U32_T io_frame_rate;
-	U32_T in_frame_rate;
-	//pr_info("%s...a->parm.capture.timeperframe.denominator=%d\n",__func__,a->parm.capture.timeperframe.denominator);
-	io_frame_rate = a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator;
-	in_frame_rate = framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
-    if ((io_frame_rate  !=0) /*&& (io_frame_rate <=85)*/)
+	U32_T io_frame_rate = 0;
+	U32_T in_frame_rate = 0;
+	pr_info("a->parm.capture.timeperframe.denominator=%d a->parm.capture.timeperframe.numerator=%d\n",a->parm.capture.timeperframe.denominator, a->parm.capture.timeperframe.numerator);
+
+    if (a->parm.capture.timeperframe.numerator > 0)
+	    io_frame_rate = a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator;
+    in_frame_rate = framegrabber_g_input_framerate(v4l2m_context->framegrabber_handle);
+    if ((io_frame_rate  > 0) && (io_frame_rate <= 144))
     {
         framegrabber_s_out_framerate(v4l2m_context->framegrabber_handle,io_frame_rate);
         //a->parm.capture.timeperframe.denominator = io_frame_rate;
-        pr_info("%s set io_framerate= %u\n", __func__, io_frame_rate);
+        pr_info("set framerate to io_framerate= %u\n", io_frame_rate);
 	}
-	else
+	else if (in_frame_rate != 0)
 	{
 		framegrabber_s_out_framerate(v4l2m_context->framegrabber_handle,in_frame_rate);
-		pr_info("%s set in_framerate= %u\n", __func__, in_frame_rate);
-	}
-   
-    
+		pr_info("set framerate to in_framerate= %u\n", in_frame_rate);
+	} else {
+        framegrabber_s_out_framerate(v4l2m_context->framegrabber_handle,REFRESHRATE_60);
+        pr_info("set framerate to 60 Hz\n");
+    }
+
+    a->parm.capture.capability   = V4L2_CAP_TIMEPERFRAME;
+
     //framegrabber_s_input_framerate(v4l2m_context->framegrabber_handle,a->parm.capture.timeperframe.denominator/a->parm.capture.timeperframe.numerator,a->parm.capture.timeperframe.denominator); //for test 
 	//pr_info("%s..%d  %d\n",__func__,a->parm.capture.timeperframe.denominator,a->parm.capture.timeperframe.numerator);
 	return 0;

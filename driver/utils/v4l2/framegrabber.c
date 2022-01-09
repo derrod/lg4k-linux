@@ -35,21 +35,24 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "4:2:2, packed, YUYV",
 		.fourcc   = V4L2_PIX_FMT_YUYV,
 		.depth    = 16,
+		.num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = YUYV,
 	},
-	#if 0
 	[FRAMEGRABBER_PIXFMT_UYVY]={ //UYVY
 		.name     = "4:2:2, packed, UYVY",
 		.fourcc   = V4L2_PIX_FMT_UYVY,
 		.depth    = 16,
+		.num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = UYVY,
 	},
+#if 0
 	[FRAMEGRABBER_PIXFMT_YVYU]={ //YVYU
 		.name     = "4:2:2, packed, YVYU",
 		.fourcc   = V4L2_PIX_FMT_YVYU,
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = YVYU,
 	},
@@ -58,6 +61,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "4:2:2, packed, VYUY",
 		.fourcc   = V4L2_PIX_FMT_VYUY,
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = true,
 		.pixfmt_out = VYUY,
 	},
@@ -66,6 +70,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB565 (LE)",
 		.fourcc   = V4L2_PIX_FMT_RGB565, /* gggbbbbb rrrrrggg */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBP,
 	},
@@ -73,6 +78,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB565 (BE)",
 		.fourcc   = V4L2_PIX_FMT_RGB565X, /* rrrrrggg gggbbbbb */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBR,
 	},
@@ -80,6 +86,7 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB555 (LE)",
 		.fourcc   = V4L2_PIX_FMT_RGB555, /* gggbbbbb arrrrrgg */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBO,
 	},
@@ -87,40 +94,79 @@ static const framegrabber_pixfmt_t support_pixfmts[] = {
 		.name     = "RGB555 (BE)",
 		.fourcc   = V4L2_PIX_FMT_RGB555X, /* arrrrrgg gggbbbbb */
 		.depth    = 16,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGBQ,
 	},
-	#endif
 	[FRAMEGRABBER_PIXFMT_RGB24]={ //RGB3 index=8
 		.name     = "RGB24 (LE)",
 		.fourcc   = V4L2_PIX_FMT_RGB24, /* rgb */
 		.depth    = 24,
+        .num_planes = 1,
 		.is_yuv   = false,
 		.pixfmt_out = RGB3,
 	},
-	#if 0
-	[FRAMEGRABBER_PIXFMT_BGR24]={ //BGR3
-		.name     = "RGB24 (BE)",
-		.fourcc   = V4L2_PIX_FMT_BGR24, /* bgr */
-		.depth    = 24,
-		.is_yuv   = false,
-		.pixfmt_out = BGR3,
-	},
-	[FRAMEGRABBER_PIXFMT_RGB32]={ //RGB4
-		.name     = "RGB32 (LE)",
-		.fourcc   = V4L2_PIX_FMT_RGB32, /* argb */
-		.depth    = 32,
-		.is_yuv   = false,
-		.pixfmt_out = RGB4,
-	},
-	[FRAMEGRABBER_PIXFMT_BGR32]={ //BGR4
+#endif
+        [FRAMEGRABBER_PIXFMT_BGR24]={ //BGR3
+                .name     = "RGB24 (BE)",
+                .fourcc   = V4L2_PIX_FMT_BGR24, /* bgr */
+                .depth    = 24,
+                .num_planes = 1,
+                .is_yuv   = false,
+                .pixfmt_out = BGR3,
+        },
+        [FRAMEGRABBER_PIXFMT_RGB32]={ //BA24
+                .name     = "RGB32 (LE)",
+                .fourcc   = V4L2_PIX_FMT_RGB32, /* argb */
+                .depth    = 32,
+                .num_planes = 1,
+                .is_yuv   = false,
+                .pixfmt_out = BA24,
+        },
+#if 0
+        [FRAMEGRABBER_PIXFMT_BGR32]={ //AR24
 		.name     = "RGB32 (BE)",
-		.fourcc   = V4L2_PIX_FMT_BGR32, /* bgra */
+		.fourcc   = V4L2_PIX_FMT_ABGR32, /* bgra */
 		.depth    = 32,
+        	.num_planes = 1,
 		.is_yuv   = false,
-		.pixfmt_out = BGR4,
+		.pixfmt_out = AR24,
 	},
-	#endif
+#endif
+#if 1 //[AVTLD-79]+
+        [FRAMEGRABBER_PIXFMT_NV12]={ //NV12
+                .name     = "NV12",
+                .fourcc   = V4L2_PIX_FMT_NV12, /* NV12M */
+                .depth    = 12,
+                .num_planes = 1,
+                .is_yuv   = true,
+                .pixfmt_out = NV12,
+        },
+        [FRAMEGRABBER_PIXFMT_YV12]={ //YV12
+                .name     = "YV12",
+                .fourcc   = V4L2_PIX_FMT_YVU420, /* YV12 */
+                .depth    = 12,
+                .num_planes = 1,
+                .is_yuv   = true,
+                .pixfmt_out = YVU420,
+        },
+        [FRAMEGRABBER_PIXFMT_NV12M]={ //NV12
+                .name     = "NV12M",
+                .fourcc   = V4L2_PIX_FMT_NV12M, /* NV12M */
+                .depth    = 12,
+                .num_planes = 2,
+                .is_yuv   = true,
+                .pixfmt_out = NV12M,
+        },
+        [FRAMEGRABBER_PIXFMT_YV12M]={ //YV12M
+                .name     = "YV12M",
+                .fourcc   = V4L2_PIX_FMT_YVU420M, /* YV12M */
+                .depth    = 12,
+                .num_planes = 3,
+                .is_yuv   = true,
+                .pixfmt_out = YVU420M,
+        }
+#endif //[AVTLD-79]-
 };
 
 static const framegrabber_frame_size_t framegrabber_support_frame_size[FRAMEGRABBER_SUPPORT_FRAMESIZE_NUM] = {
@@ -522,6 +568,134 @@ void framegrabber_s_out_framesize(framegrabber_handle_t handle,int width,int hei
 		context->interface.s_framesize(handle,width,height);
 }
 
+unsigned framegrabber_g_out_planesize(framegrabber_handle_t handle, int plane) {
+    framegrabber_context_t *context=framegrabber_getcontext(handle);
+    const framegrabber_pixfmt_t *pixfmt;
+    int width, height;
+    unsigned out_planesize;
+
+    if (!context)
+    {
+        pr_err("ERROR: context is NULL");
+        return 0;
+    }
+
+    pixfmt = &support_pixfmts[context->current_out_pixfmt];
+    width = context->current_out_framesize.width;
+    height = context->current_out_framesize.height;
+    out_planesize=0;
+
+    switch (pixfmt->pixfmt_out)
+    {
+        case NV12:
+        case NV12M:
+            if (plane == 1)
+                out_planesize = width * height;
+            else if (plane == 2)
+                out_planesize = (width * height) >> 1;
+            break;
+        case YVU420:
+        case YVU420M: //YV12
+            if (plane == 1)
+                out_planesize = width * height;
+            else if (plane == 2)
+                out_planesize = ((width >> 1) * (height >> 1));
+            else if (plane == 3)
+                out_planesize = ((width >> 1) * (height >> 1));
+            break;
+        case RGB3:
+        case BGR3:
+            if (plane == 1)
+                out_planesize = width * height * 3;
+            break;
+        case AR24:
+        case BA24:
+            if (plane == 1)
+                out_planesize = width * height * 4;
+            break;
+        default:
+            if (plane == 1)
+                out_planesize = width * height * 2;
+            break;
+    }
+
+    return out_planesize;
+}
+
+unsigned framegrabber_g_out_planarbuffersize(framegrabber_handle_t handle, int plane)
+{
+    framegrabber_context_t *context=framegrabber_getcontext(handle);
+    const framegrabber_pixfmt_t *pixfmt;
+    int width, height;
+    unsigned out_planarbufsize;
+
+    if (!context)
+    {
+        pr_err("ERROR: context is NULL");
+        return 0;
+    }
+
+    pixfmt = &support_pixfmts[context->current_out_pixfmt];
+    width = context->current_out_framesize.width;
+    height = context->current_out_framesize.height;
+    out_planarbufsize=0;
+
+    switch (pixfmt->pixfmt_out)
+    {
+        case NV12:
+            if (plane == 1)
+                out_planarbufsize = (width * height) + ((width * height) >> 1);
+//                out_planarbufsize = width * height * 3;
+            break;
+        case NV12M:
+            if (plane == 1)
+                out_planarbufsize = width * height;
+            else if (plane == 2)
+                out_planarbufsize = (width * height) >> 1;
+            break;
+        case YVU420:
+            if (plane == 1 )
+                out_planarbufsize = (width * height) + 2*((width >> 1) * (height >> 1));
+//                out_planarbufsize = width * height * 3;
+            break;
+        case YVU420M: //YV12
+            if (plane == 1)
+                out_planarbufsize = width * height;
+            else if (plane == 2)
+                out_planarbufsize = ((width >> 1) * (height >> 1));
+            else if (plane == 3)
+                out_planarbufsize = ((width >> 1) * (height >> 1));
+            break;
+        case RGB3:
+        case BGR3:
+            if (plane == 1)
+                out_planarbufsize = width * height * 3;
+            break;
+        case AR24:
+        case BA24:
+            if (plane == 1)
+                out_planarbufsize = width * height * 4;
+            break;
+        default:
+            if (plane == 1)
+                out_planarbufsize = width * height * 2;
+            break;
+    }
+
+    return out_planarbufsize;
+}
+
+unsigned framegrabber_g_out_framebuffersize(framegrabber_handle_t handle)
+{
+    unsigned out_framebufsize = 0;
+
+    out_framebufsize += framegrabber_g_out_planarbuffersize(handle, 1);
+    out_framebufsize += framegrabber_g_out_planarbuffersize(handle, 2);
+    out_framebufsize += framegrabber_g_out_planarbuffersize(handle, 3);
+
+    return out_framebufsize;
+}
+
 unsigned framegrabber_g_max_framebuffersize(framegrabber_handle_t handle)
 {
     framegrabber_context_t *context=framegrabber_getcontext(handle);
@@ -533,29 +707,94 @@ unsigned framegrabber_g_max_framebuffersize(framegrabber_handle_t handle)
     return max_framebufsize;
 }
 
-unsigned framegrabber_g_out_bytesperline(framegrabber_handle_t handle)
+unsigned framegrabber_g_out_bytesperline(framegrabber_handle_t handle, int plane)
 {
-	framegrabber_context_t *context=framegrabber_getcontext(handle);
-	const framegrabber_pixfmt_t *pixfmt=framegrabber_g_out_pixelfmt(handle);
-	unsigned bytesperline;
+    framegrabber_context_t *context=framegrabber_getcontext(handle);
 
-//        if(context->max_supported_width)
-//            bytesperline=(context->max_supported_width * pixfmt->depth) >> 3;
-//        else
-//        {
-            if(context->current_out_framesize.width)
-                bytesperline=(context->current_out_framesize.width * pixfmt->depth) >> 3;
-            else
-                bytesperline=(context->current_input_framesize.width * pixfmt->depth) >> 3;
-        //}
+    if (!context)
+    {
+        pr_err("ERROR: context is NULL");
+        return 0;
+    }
 
 
-	return bytesperline;
+    int out_bytesperline = 0;
+    int width;
+    const framegrabber_pixfmt_t *pixfmt;
+
+
+    if(context->current_out_framesize.width) {
+        width = context->current_out_framesize.width;
+    } else {
+        width = context->current_input_framesize.width;
+    }
+
+    pixfmt = &support_pixfmts[context->current_out_pixfmt];
+
+    switch (pixfmt->pixfmt_out)
+    {
+        case NV12:
+        case NV12M:
+            if (plane == 1) {
+                out_bytesperline = width;
+            }
+            else if (plane == 2) {
+                out_bytesperline = width;
+            }
+            break;
+        case YVU420:
+        case YVU420M: //YV12
+            if (plane == 1) {
+                out_bytesperline = width;
+            } else if (plane == 2) {
+                out_bytesperline = width/2;
+            } else if (plane == 3) {
+                out_bytesperline = width/2;
+            }
+            break;
+        case RGB3:
+        case BGR3:
+            if (plane == 1) {
+                out_bytesperline = width * 3;
+            }
+            break;
+        case AR24:
+        case BA24:
+            if (plane == 1) {
+                out_bytesperline = width * 4;
+            }
+            break;
+        default:
+            if (plane == 1) {
+                out_bytesperline = width * 2;
+            }
+            break;
+    }
+
+    return out_bytesperline;
 }
 
 void framegrabber_g_out_framesize(framegrabber_handle_t handle,int *width,int *height)
 {
 	framegrabber_context_t *context=framegrabber_getcontext(handle);
+
+    if (context->current_out_framesize.width == 0 || context->current_out_framesize.height == 0) {
+        context->current_out_framesize.width = context->current_input_framesize.width;
+        context->current_out_framesize.height = context->current_input_framesize.height;
+
+        if(context->interface.s_framesize)
+            context->interface.s_framesize(handle, context->current_out_framesize.width, context->current_out_framesize.height);
+    }
+
+    if (context->current_out_framesize.width == 0 || context->current_out_framesize.height == 0) {
+        context->current_out_framesize.width = 1920;
+        context->current_out_framesize.height = 1080;
+
+        pr_warn("width == 0 or height == 0 => setting width = %d, height = %d\n",  context->current_out_framesize.width,  context->current_out_framesize.height);
+
+        if(context->interface.s_framesize)
+            context->interface.s_framesize(handle, context->current_out_framesize.width, context->current_out_framesize.height);
+    }
 
 	*width=context->current_out_framesize.width;
 	*height=context->current_out_framesize.height;
@@ -814,6 +1053,19 @@ int framegrabber_g_supportframesize(framegrabber_handle_t handle,int index,int *
 	}
 	#endif
 	return FRAMEGRABBER_ERROR_INVALID_FRAMESIZE;
+}
+
+int framegrabber_g_support_framesize(framegrabber_handle_t handle,int width,int height) {
+    int i;
+
+    for(i=0;i<FRAMEGRABBER_SUPPORT_FRAMESIZE_NUM ;i++)
+    {
+        if(framegrabber_support_frame_size[i].width==width && framegrabber_support_frame_size[i].height==height) {
+            return FRAMEGRABBER_OK;
+        }
+    }
+
+    return FRAMEGRABBER_ERROR_INVALID_FRAMESIZE;
 }
 
 int framegrabber_g_framesize_supportrefreshrate(framegrabber_handle_t handle,int width,int height,int index)

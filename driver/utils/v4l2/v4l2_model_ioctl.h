@@ -22,8 +22,11 @@
 int v4l2_model_ioctl_querycap(struct file *file, void *fh, struct v4l2_capability *cap);
 int v4l2_model_ioctl_enum_fmt_vid_cap(struct file *file, void *fh, struct v4l2_fmtdesc *f);
 int v4l2_model_ioctl_g_fmt_vid_cap(struct file *file, void *fh,struct v4l2_format *f);
+int v4l2_model_ioctl_g_fmt_vid_cap_mplane(struct file *file, void *fh,struct v4l2_format *f);
 int v4l2_model_ioctl_try_fmt_vid_cap(struct file *file, void *fh, struct v4l2_format *f);
+int v4l2_model_ioctl_try_fmt_vid_cap_mplane(struct file *file, void *fh, struct v4l2_format *f);
 int v4l2_model_ioctl_s_fmt_vid_cap(struct file *file, void *fh,struct v4l2_format *f);
+int v4l2_model_ioctl_s_fmt_vid_cap_mplane(struct file *file, void *fh,struct v4l2_format *f);
 int v4l2_model_ioctl_enum_framesizes(struct file *file, void *fh, struct v4l2_frmsizeenum *fsize);
 int v4l2_model_ioctl_enum_input(struct file *file, void *fh, struct v4l2_input *inp);
 int v4l2_model_ioctl_g_input(struct file *file, void *fh, unsigned int *i);
